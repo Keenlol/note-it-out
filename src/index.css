@@ -1,0 +1,1001 @@
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ── Tokens ───────────────────────────────────────────────────────────────
+   Light-first: warm paper, because this is an app you use sitting down at the
+   end of a day. The mood ramp is a temperature scale — cool slate through warm
+   neutral to amber — and it is the ONLY saturated colour in the interface.
+   Everything else is warm greyscale, so the page reads as your mood.
+   Deliberately not red↔green: that turns the log into a scoreboard, and it is
+   the worst possible choice for colour-blind readers.                        */
+
+:root {
+  --bg:        #faf7f2;
+  --surface-1: #f1ebe1;  /* outer cards */
+  --surface-2: #e9e1d4;  /* inner boxes (recessed) */
+  --surface-3: #fffdf9;  /* elevated surfaces */
+  --line:      #e0d7c8;  /* hairlines, empty heatmap cell */
+
+  --text:       #2c2620;
+  --text-2:     rgba(44, 38, 32, 0.55);
+  --text-dim:   rgba(44, 38, 32, 0.42);
+  --text-muted: rgba(44, 38, 32, 0.28);
+
+  --accent:      #b8701a;                    /* tags — the warm end of the ramp */
+  --accent-tint: rgba(184, 112, 26, 0.10);
+  --delete:      #b0453c;
+
+  --cell-noted: #ece3d4;   /* a note, but no mood: something happened here */
+  /* Fainter than --line: an empty cell is the commonest thing on screen, and at
+     21×7 a normal hairline turns the whole grid into a wireframe. */
+  --cell-line:  #f0e9dd;
+
+  /* Mood ramp: cool → warm. Index matches MOOD_LEVELS in utils/mood.ts. */
+  --mood-0: #6d8aa4;
+  --mood-1: #9db1bf;
+  --mood-2: #cdc3b3;
+  --mood-3: #e6ab5c;
+  --mood-4: #ec9418;
+
+  --shadow-thumb: 0 1px 5px rgba(44, 38, 32, 0.22);
+
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
+  /* Entry text is set in a reading face, not a UI face — this is a journal. */
+  --editor-font: 'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, serif;
+  --editor-size: 1.125rem;
+  --editor-lh: 1.7;
+  --pad: 24px;
+}
+
+:root[data-theme='dark'] {
+  --bg:        #14120f;
+  --surface-1: #211e19;
+  --surface-2: #1a1713;
+  --surface-3: #2b261f;
+  --line:      #322c23;
+
+  --text:       #ece5da;
+  --text-2:     rgba(236, 229, 218, 0.50);
+  --text-dim:   rgba(236, 229, 218, 0.38);
+  --text-muted: rgba(236, 229, 218, 0.25);
+
+  --accent:      #e0a052;
+  --accent-tint: rgba(224, 160, 82, 0.12);
+  --delete:      #cf6157;
+
+  --cell-noted: #2a251d;
+  --cell-line:  #241f18;
+
+  --mood-0: #4d6b85;
+  --mood-1: #6d8497;
+  --mood-2: #7d7365;
+  --mood-3: #c98f38;
+  --mood-4: #e8a02a;
+
+  --shadow-thumb: 0 1px 6px rgba(0, 0, 0, 0.5);
+}
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  height: 100%;
+  overscroll-behavior: none;
+}
+
+#app {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── App shell ── */
+
+.app {
+  display: flex;
+  flex-direction: column;
+  min-height: 100dvh;
+  padding-top: env(safe-area-inset-top);
+}
+
+.content {
+  padding: 0 var(--pad) calc(72px + env(safe-area-inset-bottom));
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;   /* clip the title slide animation */
+}
+
+/* ── Tap animation — single source of truth ──────────────────────────────
+   Add `onPointerDown={tap}` (from utils/tap.ts) to any element that should
+   bounce on tap. Edit this keyframe to change the feel everywhere.          */
+
+@keyframes tap-scale {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.88); }
+  100% { transform: scale(1); }
+}
+
+@keyframes tap-scale-row {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.98); }
+  100% { transform: scale(1); }
+}
+
+.tapping {
+  animation: tap-scale 0.15s cubic-bezier(0.36, 0.07, 0.19, 0.97) both;
+}
+
+/* Heavier elements get a subtler scale */
+.tag-item.tapping,
+.tag-day.tapping {
+  animation: tap-scale-row 0.18s ease-out both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tapping { animation: none; }
+}
+
+/* ── Heatmap ── */
+
+.heatmap-wrap {
+  padding: var(--pad) var(--pad) 0;
+}
+
+.heatmap-grid {
+  display: flex;
+  gap: 3px;
+}
+
+.heatmap-col {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.heatmap-cell {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 3px;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: background 0.18s ease, box-shadow 0.15s ease;
+}
+
+.heatmap-cell.future {
+  cursor: default;
+}
+
+/* Rings sit outside the cell (outline, not inset shadow) — at this size an
+   inset ring eats most of the fill and you lose the mood colour. */
+.heatmap-cell.today {
+  outline: 1.5px solid var(--text-muted);
+  outline-offset: 1px;
+}
+
+/* After .today so a selected today still reads as selected */
+.heatmap-cell.selected {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
+}
+
+.heatmap-months {
+  display: grid;
+  grid-template-columns: repeat(21, 1fr);
+  gap: 3px;
+  margin-top: 6px;
+}
+
+.month-label {
+  font-size: 0.62rem;
+  color: var(--text-muted);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+/* ── Title row ── */
+
+.title-row {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-top: var(--pad);
+  margin-bottom: 4px;
+}
+
+.title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text);
+  line-height: 1.1;
+}
+
+.title.past {
+  font-size: 1.375rem;
+  font-weight: 600;
+  color: var(--text-2);
+}
+
+.jump-today {
+  background: none;
+  border: none;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-family: var(--font);
+  cursor: pointer;
+  padding: 0;
+  align-self: center;
+}
+
+.save-icon {
+  display: inline-flex;
+  align-items: center;
+  margin-left: auto;
+  color: var(--accent);
+  opacity: 0;
+  transition: opacity 0.3s;
+  user-select: none;
+}
+
+.save-icon.visible {
+  opacity: 1;
+}
+
+/* ── Mood slider ──────────────────────────────────────────────────────────
+   One axis, five discrete steps. The label lives in the space above the track
+   and only surfaces while the thumb is down — the colour is the permanent
+   readout, and a permanently visible grade would make the day feel scored.  */
+
+.mood-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 6px;
+  margin: 10px 0 22px;
+}
+
+.mood-slider {
+  position: relative;
+  flex: 1;
+  height: 52px;
+  touch-action: none;
+  cursor: pointer;
+  outline: none;
+}
+
+.mood-slider:focus-visible .mood-track {
+  box-shadow: 0 0 0 2px var(--accent-tint), 0 0 0 3px var(--accent);
+}
+
+.mood-track {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 10px;
+  height: 10px;
+  display: flex;
+  border-radius: 5px;
+  overflow: hidden;
+  opacity: 0.32;
+  transition: opacity 0.22s ease;
+}
+
+.mood-slider.set .mood-track {
+  opacity: 1;
+}
+
+.mood-step {
+  flex: 1;
+}
+
+/* Inset by the thumb's radius so index 0 and index max sit flush with the
+   track ends instead of overhanging them. */
+.mood-rail {
+  position: absolute;
+  left: 11px;
+  right: 11px;
+  bottom: 10px;
+  height: 10px;
+  pointer-events: none;
+}
+
+.mood-thumb {
+  position: absolute;
+  top: 50%;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  border: 3px solid var(--bg);
+  transform: translate(-50%, -50%);
+  box-shadow: var(--shadow-thumb);
+  transition: left 0.14s cubic-bezier(0.16, 1, 0.3, 1), background 0.14s ease;
+}
+
+.mood-label {
+  position: absolute;
+  bottom: calc(100% + 12px);
+  transform: translateX(-50%);
+  font-size: 0.82rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  background: var(--surface-1);
+  border-radius: 999px;
+  padding: 3px 11px;
+  white-space: nowrap;
+  opacity: 0;
+  transition: opacity 0.18s ease, left 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.mood-label.visible {
+  opacity: 1;
+}
+
+.mood-hint {
+  position: absolute;
+  left: 0;
+  bottom: calc(100% - 34px);
+  font-size: 0.74rem;
+  color: var(--text-muted);
+}
+
+.mood-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 6px;
+  margin-bottom: 4px;
+  display: inline-flex;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.mood-clear.visible {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mood-thumb, .mood-label { transition: none; }
+}
+
+/* ── Editor ── */
+
+.editor-wrap {
+  position: relative;
+  flex: 1;
+  width: 100%;
+}
+
+/* Shared typography — overlay and textarea must be pixel-identical. Both use
+   the same max() so a small root font can't desync them. */
+.editor-overlay,
+.editor-textarea {
+  font-family: var(--editor-font);
+  font-size: max(16px, var(--editor-size));
+  line-height: var(--editor-lh);
+  letter-spacing: normal;
+  word-spacing: normal;
+  white-space: pre-wrap;
+  word-break: break-word;
+  width: 100%;
+  padding: 0;
+  border: none;
+  outline: none;
+}
+
+.editor-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  pointer-events: none;
+  color: var(--text);
+  user-select: none;
+}
+
+.editor-textarea {
+  position: relative;
+  display: block;
+  background: transparent;
+  color: transparent;
+  caret-color: var(--accent);
+  resize: none;
+  overflow: hidden;
+  min-height: 160px;
+  z-index: 1;
+}
+
+.editor-textarea::placeholder {
+  color: var(--text-muted);
+}
+
+.editor-textarea.read-only {
+  cursor: default;
+}
+
+/* A #tag, anywhere in a line */
+.tag {
+  color: var(--accent);
+}
+
+.ghost {
+  color: var(--text-dim);
+}
+
+.ghost-enter-icon {
+  display: inline;
+  vertical-align: middle;
+  margin-left: 5px;
+  opacity: 0.7;
+  position: relative;
+  top: -1px;
+}
+
+/* Tag options: floats below the line being typed, outside normal text flow.
+   font-size must match the editor or the `1em` line-offset math drifts. */
+.ghost-tag-block {
+  position: absolute;
+  left: 0;
+  right: 0;
+  font-size: max(16px, var(--editor-size));
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  pointer-events: none;
+}
+
+.ghost-tag-chip {
+  font-family: var(--font);
+  font-size: 0.76rem;
+  line-height: 1.5;
+  padding: 1px 8px;
+  border-radius: 999px;
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+/* ── Bottom bar ── */
+
+.bottom-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 30;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 calc(12px + env(safe-area-inset-bottom));
+  background: linear-gradient(to top, var(--bg) 55%, transparent);
+}
+
+.bottom-bar-main {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.bottom-btn-settings {
+  position: absolute;
+  right: calc(var(--pad) - 10px);   /* 10px = the button's own padding */
+}
+
+.bottom-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 10px;
+  display: inline-flex;
+  align-items: center;
+  touch-action: none;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: color 0.1s;
+}
+
+/* Lit state is driven only by .active so each button follows its own logic and
+   a tap on one can never light another (hover sticks on touch). */
+.bottom-btn.active {
+  color: var(--text);
+}
+
+/* ── Sheets ── */
+
+.sheet-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 19;
+  background: transparent;   /* tap-catcher only — must not dim the heatmap */
+}
+
+.sheet {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 62vh;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  border-radius: 16px 16px 0 0;
+  transform: translateY(100%);
+  transition: transform 0.32s cubic-bezier(0.32, 0.72, 0, 1);
+  display: flex;
+  flex-direction: column;
+  z-index: 20;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.sheet.open {
+  transform: translateY(0);
+}
+
+.sheet-handle-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 10px 0 6px;
+  cursor: ns-resize;
+  flex-shrink: 0;
+  touch-action: none;   /* drag to resize without scrolling the page */
+}
+
+.sheet-handle {
+  width: 36px;
+  height: 4px;
+  background: var(--surface-2);
+  border-radius: 2px;
+}
+
+.sheet-header {
+  padding: 4px var(--pad) 12px;
+  flex-shrink: 0;
+}
+
+.sheet-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.sheet-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+}
+
+.sheet-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 var(--pad) calc(var(--pad) + 40px);
+}
+
+.sheet-empty {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  padding: 8px 2px;
+}
+
+.sheet-search {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--surface-1);
+  border-radius: 8px;
+  padding: 7px 10px;
+  color: var(--text-muted);
+}
+
+.sheet-search:focus-within {
+  color: var(--text-dim);
+}
+
+.sheet-search input {
+  flex: 1;
+  background: none;
+  border: none;
+  outline: none;
+  color: var(--text);
+  font-family: var(--font);
+  font-size: max(16px, 0.85rem);
+  min-width: 0;
+}
+
+.sheet-search input::placeholder {
+  color: var(--text-muted);
+}
+
+.sheet-search-clear {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: inline-flex;
+  padding: 0;
+}
+
+/* ── Tag list ─────────────────────────────────────────────────────────────
+   Two-level nested box: outer card (--surface-1, r8, padding 0 5px) with an
+   inner box (--surface-2, r3 = 8 − 5). overflow:hidden on the outer is
+   mandatory — it stops the inner's margin-bottom collapsing through.        */
+
+.tag-item-wrap {
+  background: var(--surface-1);
+  border-radius: 8px;
+  padding: 0 5px;
+  margin-bottom: 5px;
+  overflow: hidden;
+}
+
+.tag-item {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 6px 6px;
+  cursor: pointer;
+}
+
+.tag-name {
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.tag-count {
+  font-size: 0.72rem;
+  color: var(--accent);
+  white-space: nowrap;
+}
+
+.tag-inner {
+  background: var(--surface-2);
+  border-radius: 3px;
+  margin-bottom: 5px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.tag-mood {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.tag-mood-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.tag-mood-text {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.tag-mood-text strong {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+.tag-delta {
+  font-size: 0.78rem;
+  font-weight: 600;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.tag-delta.up    { color: var(--mood-4); }
+.tag-delta.down  { color: var(--mood-0); }
+.tag-delta.muted { color: var(--text-muted); font-weight: 500; }
+
+.tag-delta-label {
+  font-size: 0.72rem;
+  font-weight: 400;
+  color: var(--text-muted);
+}
+
+.tag-days {
+  background: var(--surface-2);
+  border-radius: 3px;
+  margin-bottom: 5px;
+  padding: 4px;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tag-day {
+  background: none;
+  border: none;
+  text-align: left;
+  font-family: var(--font);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 3px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.tag-day-head {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.tag-day-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  border: 1px solid transparent;
+  flex-shrink: 0;
+}
+
+.tag-day-date {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.tag-day-line {
+  font-size: 0.78rem;
+  color: var(--text-2);
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+/* ── Settings ── */
+
+.settings-body {
+  overflow-y: auto;
+  flex: 1;
+  padding: 0 var(--pad) calc(var(--pad) + 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+}
+
+.settings-section {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.settings-section-label {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+.settings-section-hint {
+  font-size: 0.7rem;
+  color: var(--text-muted);
+  line-height: 1.5;
+  margin-top: -6px;
+}
+
+/* Segmented control — generic, works for any number of options */
+
+.seg-control {
+  display: inline-flex;
+  background: var(--surface-1);
+  border-radius: 8px;
+  padding: 3px;
+  position: relative;
+  align-self: flex-start;
+}
+
+/* Sliding pill — position driven by CSS custom properties set inline */
+.seg-indicator {
+  position: absolute;
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  width: calc((100% - 6px) / var(--seg-n));
+  border-radius: 6px;
+  background: var(--text);
+  transform: translateX(calc(100% * var(--seg-i)));
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: none;
+}
+
+.seg-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 500;
+  padding: 5px 12px;
+  border-radius: 6px;
+  cursor: pointer;
+  position: relative;
+  z-index: 1;            /* sit above the indicator */
+  transition: color 0.15s;
+  text-align: center;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+.seg-btn.active {
+  color: var(--bg);
+}
+
+/* Stat card */
+
+.data-stat-card {
+  background: var(--surface-1);
+  border-radius: 10px;
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.data-stat-size {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.data-stat-size-value {
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.data-stat-size-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+.data-stat-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+}
+
+.data-stat-count {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.data-stat-count strong {
+  color: var(--text-2);
+  font-weight: 600;
+}
+
+/* Action buttons */
+
+.data-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.data-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--surface-1);
+  border: none;
+  border-radius: 8px;
+  color: var(--text-2);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 500;
+  padding: 8px 12px;
+  cursor: pointer;
+  transition: color 0.15s, background 0.15s;
+}
+
+.data-btn:hover, .data-btn:active {
+  color: var(--text);
+}
+
+.data-btn-danger {
+  color: var(--delete);
+}
+
+.data-btn-ghost {
+  background: none;
+  color: var(--text-dim);
+}
+
+.data-btn-ghost:hover, .data-btn-ghost:active {
+  color: var(--text-2);
+}
+
+/* Inline confirmation — never window.confirm() */
+
+.data-confirm {
+  background: var(--surface-1);
+  border-radius: 10px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.data-confirm-title {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.data-confirm-hint {
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+
+.data-confirm-hint strong {
+  color: var(--text-2);
+}
+
+.data-confirm-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.data-confirm .data-btn {
+  background: var(--surface-2);
+}
+
+.data-confirm .data-btn-ghost {
+  background: none;
+}
+
+/* About card */
+
+.about-card {
+  background: var(--surface-1);
+  border-radius: 8px;
+  padding: 0 5px;
+  overflow: hidden;
+}
+
+.about-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 6px;
+}
+
+.about-row + .about-row {
+  border-top: 1px solid var(--line);
+}
+
+.about-key {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+}
+
+.about-val {
+  font-size: 0.78rem;
+  color: var(--text-2);
+}

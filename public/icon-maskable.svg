@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Maskable variant: full-bleed background, mark scaled to the inner 80% safe zone. -->
+  <rect width="512" height="512" fill="#f7f1e6"/>
+  <g transform="translate(256 256) scale(0.72) translate(-256 -256)">
+    <rect x="80"  y="80"  width="96" height="96" rx="22" fill="#6d8aa4"/>
+    <rect x="208" y="80"  width="96" height="96" rx="22" fill="#9db1bf"/>
+    <rect x="336" y="80"  width="96" height="96" rx="22" fill="#cdc3b3"/>
+    <rect x="80"  y="208" width="96" height="96" rx="22" fill="#9db1bf"/>
+    <rect x="208" y="208" width="96" height="96" rx="22" fill="#cdc3b3"/>
+    <rect x="336" y="208" width="96" height="96" rx="22" fill="#e6ab5c"/>
+    <rect x="80"  y="336" width="96" height="96" rx="22" fill="#cdc3b3"/>
+    <rect x="208" y="336" width="96" height="96" rx="22" fill="#e6ab5c"/>
+    <rect x="336" y="336" width="96" height="96" rx="22" fill="#ec9418"/>
+  </g>
+</svg>
