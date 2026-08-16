@@ -14,7 +14,7 @@ No test suite — verify features manually in the browser.
 
 ## Git workflow
 
-After successfully implementing a feature (when the user accepts it without asking for changes or adjustments), automatically create a git commit on the `main` branch with a concise commit message describing what was added. Stage only relevant source files — not `dist/`. After committing, always state in the response that a commit was made and include the commit message.
+Commit **every** change, as soon as it works — don't wait to be asked and don't wait for the user to accept it. A request that covers two separable things is two commits, each made as it lands. Commit on the `main` branch with a concise message describing what changed and why. Stage only relevant source files — not `dist/`. After committing, always state in the response that a commit was made and include the commit message.
 
 **Never push** unless the user explicitly asks. The user handles all `git push` operations.
 
@@ -46,9 +46,12 @@ Known-incomplete, in priority order:
 - **No deployment yet.** `vercel.json` is ready; the project just needs importing
   at vercel.com/new. Note that note-it-down lives on a *different* Vercel account
   from the one Claude Code's MCP integration can reach — ask before creating one.
-- **Mood labels are unvalidated** — `rough / low / okay / good / great`. They're
-  one array in `utils/mood.ts` and the scale length derives from it, so moving to
-  7 steps means the array plus two more `--mood-N` pairs in `index.css`.
+- **Mood labels are unvalidated** — `bleak / rough / low / okay / good / great /
+  bright`. They're one array in `utils/mood.ts` and the scale length derives from
+  it. Seven is the ceiling the palette supports; changing the *length* again
+  means the array, the `--mood-N` pairs in `index.css`, **and** a branch in
+  `migrateMoodScale` (storage.ts) plus an `EXPORT_VERSION` bump — stored days are
+  indexes into this array, so they mean nothing without it.
 
 **Deliberately deferred, do not add without being asked:**
 
@@ -117,10 +120,19 @@ average, or a thumb mid-drag) — the latter blends neighbouring steps via
 
 `--rail-cx` = `--pad + --track-rest-w/2`: the mood rail's centre line, measured
 from the right edge of the screen. The heatmap grid ends on `--pad`, the rail's
-track sits just inside that same edge, and the settings gear is centred on the
-line. **Anything else pinned to the right derives its position from
-`--rail-cx`** — the page gets one vertical axis, not three, and it stays aligned
-if `--pad` ever changes. Nothing here is nudged by eye.
+track sits just inside that same edge, and the dock (clear-mood, tags, settings)
+is centred on the line beneath it. **Anything else pinned to the right derives
+its position from `--rail-cx`** — the page gets one vertical axis, not three, and
+it stays aligned if `--pad` ever changes. Nothing here is nudged by eye.
+
+The layout that carries it: `.content` is two columns, `.content-main` (date +
+note) and a 44px `.mood-column` spacer. The rail is `position: fixed` between the
+graph and the dock — it is frame, not page, so it neither scrolls away from a
+long note nor slides up and leaves a hole above the dock. Being fixed, it has to
+be told where the graph ends: `--content-top`, set in App.tsx from the same
+measurement the sheet height uses. That is the one number CSS can't derive here,
+and `--dock-h` is what keeps the rail's foot off the dock — derive it, never
+restate it.
 
 The rail's hit area deliberately bleeds `--pad` past the content edge so it runs
 to the edge of the screen: the visual stays a hairline, the target is 68px wide.
@@ -190,8 +202,11 @@ two media-scoped ones for the pre-JS first paint.
 
 ```css
 border-radius: 16px 16px 0 0;
-z-index: 20;                                   /* scrim 19, bottom bar 30 */
+z-index: 20;                                   /* scrim 19, dock 30 */
 ```
+The sheet paints over the mood rail (the rail is `position: fixed` with an auto
+z-index, earlier in the DOM) but under the dock, so the dock keeps working as a
+tab bar while a sheet is open — exactly what the bottom bar used to do.
 Sheets slide up from the bottom and are mutually exclusive. Default height is
 measured from `heatmapRef.bottom` to `visualViewport.height`, so an open sheet
 never covers the grid; dragging the handle opts out of auto-sizing for good, and
@@ -213,6 +228,9 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `utils/storage.ts` — one record per day under `day_YYYY-MM-DD`, holding both
   `rawText` and `mood` together. A day with neither is deleted, not stored empty.
   `saveDayText` / `saveDayMood` both read-modify-write so neither clobbers the other.
+  Also holds `migrateMoodScale`, run once from `main.tsx` before anything reads a
+  day — it is gated on the stored scale length, because a migration that shifts
+  indexes is only safe if it cannot run twice.
 - `utils/parser.ts` — the core, and deliberately tiny. Extracts `#tags` from a
   line and nothing else. `activeTagFragment` drives autocomplete.
 - `utils/tags.ts` — `buildTagCatalog` aggregates across days. Tags are counted
@@ -227,9 +245,9 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `components/MoodSlider.tsx` — the day's mood. A discrete vertical rail down
   the right edge, warm end at the top; label on drag only. A step rests at the
   **middle of its band**, not at the end of the track, and a touch anywhere in a
-  band selects it. Sticky, so a long note can scroll without putting the rail
-  out of thumb reach — which is why `.content` uses `overflow-x: clip` and not
-  `hidden` (`hidden` would make it a scroll container and neuter the sticky).
+  band selects it. The rail renders only the track; clearing the mood lives in
+  the dock in `App.tsx` with the two sheet toggles, since all three are one
+  stack on the same axis.
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
 - `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.

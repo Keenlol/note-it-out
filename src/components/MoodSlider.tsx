@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from 'react'
-import { X } from 'lucide-react'
 import {
   MOOD_COUNT, MOOD_LEVELS, MOOD_MAX, clampMood, moodColor, moodColorMix, moodLabel,
 } from '../utils/mood'
-import { tap } from '../utils/tap'
 
 interface Props {
   value: number | null
   onChange: (value: number | null) => void
+  /** Opacity for the day-change fade. The mood belongs to the day it labels. */
+  fade?: number
 }
 
 // How long the label lingers after you let go.
@@ -34,7 +34,7 @@ const THUMB_STOP = 13
  * The label is deliberately transient — the colour is the permanent readout, and
  * a permanently visible grade would make the day feel scored.
  */
-export function MoodSlider({ value, onChange }: Props) {
+export function MoodSlider({ value, onChange, fade = 1 }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const lastIndex = useRef<number | null>(null)
@@ -136,21 +136,12 @@ export function MoodSlider({ value, onChange }: Props) {
   return (
     <div
       className="mood-column"
-      // The note area swipes to change day; a drag on the rail is never that.
+      style={{ opacity: fade }}
+      // The page swipes to change day; a drag on the rail is never that.
       onTouchStart={e => e.stopPropagation()}
       onTouchMove={e => e.stopPropagation()}
       onTouchEnd={e => e.stopPropagation()}
     >
-      <button
-        className={`mood-clear${isSet ? ' visible' : ''}`}
-        onPointerDown={tap}
-        onClick={() => onChange(null)}
-        aria-label="Clear mood"
-        tabIndex={isSet ? 0 : -1}
-      >
-        <X size={14} strokeWidth={2.2} />
-      </button>
-
       <div
         className={`mood-slider${isSet ? ' set' : ''}${isDragging ? ' dragging' : ''}`}
         onPointerDown={onPointerDown}

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, Hash, Settings } from 'lucide-react'
+import { Check, Hash, Settings, X } from 'lucide-react'
 import { Heatmap } from './components/Heatmap'
 import { Editor, type Suggestion } from './components/Editor'
 import { MoodSlider } from './components/MoodSlider'
@@ -195,6 +195,12 @@ export function App() {
     if (!el) return
     const update = () => {
       const vh = window.visualViewport?.height ?? window.innerHeight
+      // Where the two columns start, in document coords so scrolling can't
+      // skew it. The mood rail sizes itself off this: its length depends on
+      // where it begins, which no CSS length can express.
+      document.documentElement.style.setProperty(
+        '--content-top', `${el.getBoundingClientRect().bottom + window.scrollY}px`,
+      )
       if (manualHeight.current) {
         setSheetHeight(h => (h === undefined ? h : clampSheetHeight(h)))
         return
@@ -349,56 +355,69 @@ export function App() {
         />
       </div>
 
+      {/* Two columns: the day on the left, the mood rail down the right. The
+          rail is a sibling of the title rather than sitting under it, so it
+          starts level with the day and directly under the graph. */}
       <div
         className="content"
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
       >
-        <div className="title-row">
-          <h1 className={`title${isPast ? ' past' : ''}`} style={titleStyle}>
-            {formatDisplayDate(currentDate)}
-          </h1>
-          {isPast && (
-            <button className="jump-today" onPointerDown={tap} onClick={() => setViewDate(null)}>
-              Today
-            </button>
-          )}
-          <span className={`save-icon${savedFlash ? ' visible' : ''}`} aria-hidden="true">
-            <Check size={14} strokeWidth={2.4} />
-          </span>
+        <div className="content-main">
+          <div className="title-row">
+            <h1 className={`title${isPast ? ' past' : ''}`} style={titleStyle}>
+              {formatDisplayDate(currentDate)}
+            </h1>
+            {isPast && (
+              <button className="jump-today" onPointerDown={tap} onClick={() => setViewDate(null)}>
+                Today
+              </button>
+            )}
+            <span className={`save-icon${savedFlash ? ' visible' : ''}`} aria-hidden="true">
+              <Check size={14} strokeWidth={2.4} />
+            </span>
+          </div>
+
+          <div className="note-fade" style={{ opacity: noteOpacity }}>
+            <Editor
+              value={text}
+              onChange={handleTextChange}
+              onCursorChange={setCursor}
+              onAccept={acceptSuggestion}
+              suggestion={suggestion}
+              placeholder={PLACEHOLDER}
+              textareaRef={textareaRef}
+            />
+          </div>
         </div>
 
-        {/* Note and mood are one unit: both belong to the day, so both fade
-            together when a swipe carries you to another one. */}
-        <div className="note-area" style={{ opacity: noteOpacity }}>
-          <Editor
-            value={text}
-            onChange={handleTextChange}
-            onCursorChange={setCursor}
-            onAccept={acceptSuggestion}
-            suggestion={suggestion}
-            placeholder={PLACEHOLDER}
-            textareaRef={textareaRef}
-          />
-
-          <MoodSlider value={mood} onChange={handleMoodChange} />
-        </div>
+        {/* Note and mood both belong to the day, so both fade on a swipe. */}
+        <MoodSlider value={mood} onChange={handleMoodChange} fade={noteOpacity} />
       </div>
 
-      <div className="bottom-bar">
-        <div className="bottom-bar-main">
-          <button
-            className={`bottom-btn${tagSheetOpen ? ' active' : ''}`}
-            onPointerDown={tap}
-            onClick={openTagSheet}
-            aria-label="Tags"
-          >
-            <Hash size={22} strokeWidth={1.8} />
-          </button>
-        </div>
+      {/* The rail's foot: clear-mood, then the two sheets. Fixed, so it stays
+          reachable and stays above an open sheet the way a tab bar does. */}
+      <div className="dock">
         <button
-          className={`bottom-btn bottom-btn-settings${settingsOpen ? ' active' : ''}`}
+          className={`dock-btn dock-clear${mood !== null && !anySheetOpen ? ' visible' : ''}`}
+          onPointerDown={tap}
+          onClick={() => handleMoodChange(null)}
+          aria-label="Clear mood"
+          tabIndex={mood !== null && !anySheetOpen ? 0 : -1}
+        >
+          <X size={18} strokeWidth={2.2} />
+        </button>
+        <button
+          className={`dock-btn${tagSheetOpen ? ' active' : ''}`}
+          onPointerDown={tap}
+          onClick={openTagSheet}
+          aria-label="Tags"
+        >
+          <Hash size={22} strokeWidth={1.8} />
+        </button>
+        <button
+          className={`dock-btn${settingsOpen ? ' active' : ''}`}
           onPointerDown={tap}
           onClick={openSettings}
           aria-label="Settings"

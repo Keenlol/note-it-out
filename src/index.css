@@ -65,6 +65,12 @@
      position from this, so the page has one vertical line, not three. */
   --track-rest-w: 10px;
   --rail-cx: calc(var(--pad) + var(--track-rest-w) / 2);
+
+  /* The dock at the foot of the rail. --dock-h is the space the rail must not
+     grow into; derive it, never restate it. */
+  --dock-btn: 40px;
+  --dock-gap: 6px;
+  --dock-h: calc(3 * var(--dock-btn) + 2 * var(--dock-gap));
 }
 
 :root[data-theme='dark'] {
@@ -123,10 +129,11 @@ html, body {
 }
 
 .content {
-  padding: 0 var(--pad) calc(72px + env(safe-area-inset-bottom));
+  padding: 0 var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
   flex: 1;
   display: flex;
-  flex-direction: column;
+  gap: 6px;
+  align-items: stretch;
   /* Clip, not hidden: `hidden` would make this a scroll container, and the
      mood rail's sticky offset would then resolve against a box that never
      scrolls — i.e. do nothing. `clip` clips the title slide just the same
@@ -134,6 +141,22 @@ html, body {
      too old for `clip` keeps the clipping and loses only the sticky. */
   overflow-x: hidden;
   overflow-x: clip;
+}
+
+.content-main {
+  flex: 1;
+  min-width: 0;     /* flex sibling of the mood rail: shrink, don't overflow */
+  display: flex;
+  flex-direction: column;
+}
+
+.note-fade {
+  flex: 1;
+  display: flex;
+  /* The mood row used to sit here and space the note off the date. It doesn't
+     any more, so the gap has to be stated. */
+  margin-top: 16px;
+  transition: opacity 0.08s ease;
 }
 
 /* ── Tap animation — single source of truth ──────────────────────────────
@@ -275,10 +298,10 @@ html, body {
 }
 
 /* ── Mood slider ──────────────────────────────────────────────────────────
-   One axis, five discrete steps, run vertically down the right edge beside the
-   note. Vertical because this is a one-handed phone app: the rail lands under
-   the thumb and costs the note no vertical space. Warm end at the top — the
-   reading a thermometer gives you, not a ranking.
+   One axis, seven discrete steps, run vertically down the right edge from just
+   under the graph to the dock. Vertical because this is a one-handed phone app:
+   the rail lands under the thumb and costs the note no vertical space. Warm end
+   at the top — the reading a thermometer gives you, not a ranking.
 
    Geometry is derived from one line, --track-cx, so the track's right edge
    lands on the same --pad the heatmap grid ends on. The two are aligned by
@@ -287,49 +310,40 @@ html, body {
    The label only surfaces while the thumb is down; the colour is the permanent
    readout, and a permanently visible grade would make the day feel scored.   */
 
-.note-area {
-  flex: 1;
-  display: flex;
-  align-items: stretch;
-  gap: 6px;
-  min-height: 0;
-  margin-top: 14px;
-  transition: opacity 0.08s ease;
-}
-
 .mood-column {
   --track-w: var(--track-rest-w);
   --thumb-d: 22px;
-  --clear-d: 26px;
+  /* How far the rail clears the graph above it and the dock below it. */
+  --rail-top: 12px;
+
   /* The slider's box bleeds exactly --pad into the gutter, so it ends on the
      screen edge — which makes --rail-cx read the same from either edge, and
      puts the track's right edge on the heatmap's right edge. */
   --track-cx: var(--rail-cx);
 
+/* Only a spacer: it holds the gutter open in the flow so the note never runs
+   under the rail. The rail itself is taken out of flow below. */
   flex: none;
   width: 44px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  /* Bottom-anchored: the reachable half of the screen, one-handed. */
-  justify-content: flex-end;
 }
 
-/* Sticky, not relative: a long note scrolls the page, and a rail you have to
-   scroll to reach is worse than no rail. The offset matches .content's bottom
-   padding, so at the end of the scroll it lands exactly where it would sit
-   anyway — it never visibly detaches.
+/* Fixed, spanning graph to dock. The rail is frame, not page: it shouldn't
+   scroll away from a long note, and it shouldn't slide up and leave a hole
+   above the dock either, which is what a sticky offset in one direction gives
+   you. Being fixed, it needs to be told where the graph ends — that is
+   --content-top, measured in App.tsx, the one thing here CSS can't derive.
 
    The box also bleeds --pad past the content edge: the visual stays a hairline
    while the thing you can actually hit runs to the edge of the screen. */
 .mood-slider {
-  position: sticky;
-  bottom: calc(72px + env(safe-area-inset-bottom));
-  width: calc(100% + var(--pad));
-  margin-right: calc(-1 * var(--pad));
-  flex: 1;
+  position: fixed;
+  right: 0;
+  top: calc(var(--content-top, 190px) + var(--rail-top));
+  bottom: calc(
+    var(--dock-h) + var(--rail-top) + var(--pad) + env(safe-area-inset-bottom)
+  );
+  width: calc(44px + var(--pad));
   min-height: 170px;
-  max-height: 360px;
   touch-action: none;
   cursor: pointer;
   outline: none;
@@ -442,29 +456,6 @@ html, body {
   color: var(--text-muted);
 }
 
-/* Sits on the track's line, not the column's — it reads as the cap of the rail. */
-.mood-clear {
-  width: var(--clear-d);
-  height: var(--clear-d);
-  margin-right: calc(var(--track-rest-w) / 2 - var(--clear-d) / 2);
-  margin-bottom: 6px;
-  background: none;
-  border: none;
-  color: var(--text-muted);
-  cursor: pointer;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.2s ease;
-}
-
-.mood-clear.visible {
-  opacity: 1;
-  pointer-events: auto;
-}
-
 /* Position and size stop animating; the fades stay — they carry no motion. */
 @media (prefers-reduced-motion: reduce) {
   .mood-slider .mood-track,
@@ -571,52 +562,63 @@ html, body {
   color: var(--accent);
 }
 
-/* ── Bottom bar ── */
+/* ── Dock ─────────────────────────────────────────────────────────────────
+   The foot of the rail: clear-mood, then the two sheets, stacked on the same
+   --rail-cx line so the right edge of the app is one column from the heatmap
+   down. Fixed rather than in flow, because these have to stay reachable while
+   a long note scrolls and stay above an open sheet, the way a tab bar does.
+   .mood-column reserves --dock-h so the rail ends exactly where this starts. */
 
-.bottom-bar {
+.dock {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  right: calc(var(--rail-cx) - var(--dock-btn) / 2);
+  bottom: calc(var(--pad) + env(safe-area-inset-bottom));
   z-index: 30;
   display: flex;
-  justify-content: center;
+  flex-direction: column;
   align-items: center;
-  padding: 10px 0 calc(12px + env(safe-area-inset-bottom));
-  background: linear-gradient(to top, var(--bg) 55%, transparent);
+  gap: var(--dock-gap);
+  /* Only the buttons catch taps. The box between them sits over an open sheet,
+     and a transparent strip that swallows taps on the rows beneath is a bug
+     you can't see. */
+  pointer-events: none;
 }
 
-.bottom-bar-main {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-}
-
-/* Centred on the mood rail's line, so the rail and the gear share the page's
-   right-hand axis. 20px = half the button (20px icon + 10px padding a side). */
-.bottom-btn-settings {
-  position: absolute;
-  right: calc(var(--rail-cx) - 20px);
-}
-
-.bottom-btn {
+.dock-btn {
+  pointer-events: auto;
+  width: var(--dock-btn);
+  height: var(--dock-btn);
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 10px;
+  padding: 0;
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   touch-action: none;
   user-select: none;
   -webkit-user-select: none;
-  transition: color 0.1s;
+  transition: color 0.1s, opacity 0.2s ease;
 }
 
 /* Lit state is driven only by .active so each button follows its own logic and
    a tap on one can never light another (hover sticks on touch). */
-.bottom-btn.active {
+.dock-btn.active {
   color: var(--text);
+}
+
+/* Clearing is only offered when there's a mood to clear — and not over a sheet,
+   where the rail it belongs to isn't visible. Space is held either way, so the
+   two below it never move. */
+.dock-clear {
+  opacity: 0;
+  pointer-events: none;
+}
+
+.dock-clear.visible {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 /* ── Sheets ── */
