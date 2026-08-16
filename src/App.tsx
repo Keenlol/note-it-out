@@ -369,9 +369,9 @@ export function App() {
           </span>
         </div>
 
-        <MoodSlider value={mood} onChange={handleMoodChange} />
-
-        <div style={{ opacity: noteOpacity, transition: 'opacity 0.08s ease', flex: 1, display: 'flex' }}>
+        {/* Note and mood are one unit: both belong to the day, so both fade
+            together when a swipe carries you to another one. */}
+        <div className="note-area" style={{ opacity: noteOpacity }}>
           <Editor
             value={text}
             onChange={handleTextChange}
@@ -381,6 +381,8 @@ export function App() {
             placeholder={PLACEHOLDER}
             textareaRef={textareaRef}
           />
+
+          <MoodSlider value={mood} onChange={handleMoodChange} />
         </div>
       </div>
 

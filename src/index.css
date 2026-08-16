@@ -43,12 +43,24 @@
 
   --shadow-thumb: 0 1px 5px rgba(44, 38, 32, 0.22);
 
+  /* Motion. --spring overshoots ~10% and settles: what a control released from
+     a finger should do. Use it for anything that lands on a position; use plain
+     ease for opacity and colour, which have nothing to overshoot. */
+  --spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
   --font: -apple-system, BlinkMacSystemFont, 'SF Pro Text', system-ui, sans-serif;
   /* Entry text is set in a reading face, not a UI face — this is a journal. */
   --editor-font: 'Iowan Old Style', 'Palatino Linotype', Palatino, Charter, Georgia, serif;
   --editor-size: 1.125rem;
   --editor-lh: 1.7;
   --pad: 24px;
+
+  /* The right-hand axis. The heatmap grid ends --pad from the screen edge, the
+     mood rail's track sits just inside that same edge, and --rail-cx is the
+     track's centre line. Anything else pinned to the right edge derives its
+     position from this, so the page has one vertical line, not three. */
+  --track-rest-w: 10px;
+  --rail-cx: calc(var(--pad) + var(--track-rest-w) / 2);
 }
 
 :root[data-theme='dark'] {
@@ -107,7 +119,13 @@ html, body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  overflow-x: hidden;   /* clip the title slide animation */
+  /* Clip, not hidden: `hidden` would make this a scroll container, and the
+     mood rail's sticky offset would then resolve against a box that never
+     scrolls — i.e. do nothing. `clip` clips the title slide just the same
+     without creating a scrollport. `hidden` first as the fallback: anything
+     too old for `clip` keeps the clipping and loses only the sticky. */
+  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 /* ── Tap animation — single source of truth ──────────────────────────────
@@ -249,44 +267,96 @@ html, body {
 }
 
 /* ── Mood slider ──────────────────────────────────────────────────────────
-   One axis, five discrete steps. The label lives in the space above the track
-   and only surfaces while the thumb is down — the colour is the permanent
-   readout, and a permanently visible grade would make the day feel scored.  */
+   One axis, five discrete steps, run vertically down the right edge beside the
+   note. Vertical because this is a one-handed phone app: the rail lands under
+   the thumb and costs the note no vertical space. Warm end at the top — the
+   reading a thermometer gives you, not a ranking.
 
-.mood-row {
+   Geometry is derived from one line, --track-cx, so the track's right edge
+   lands on the same --pad the heatmap grid ends on. The two are aligned by
+   construction; nothing here is nudged by eye.
+
+   The label only surfaces while the thumb is down; the colour is the permanent
+   readout, and a permanently visible grade would make the day feel scored.   */
+
+.note-area {
+  flex: 1;
   display: flex;
-  align-items: flex-end;
+  align-items: stretch;
   gap: 6px;
-  margin: 10px 0 22px;
+  min-height: 0;
+  margin-top: 14px;
+  transition: opacity 0.08s ease;
 }
 
+.mood-column {
+  --track-w: var(--track-rest-w);
+  --thumb-d: 22px;
+  --clear-d: 26px;
+  /* The slider's box bleeds exactly --pad into the gutter, so it ends on the
+     screen edge — which makes --rail-cx read the same from either edge, and
+     puts the track's right edge on the heatmap's right edge. */
+  --track-cx: var(--rail-cx);
+
+  flex: none;
+  width: 44px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  /* Bottom-anchored: the reachable half of the screen, one-handed. */
+  justify-content: flex-end;
+}
+
+/* Sticky, not relative: a long note scrolls the page, and a rail you have to
+   scroll to reach is worse than no rail. The offset matches .content's bottom
+   padding, so at the end of the scroll it lands exactly where it would sit
+   anyway — it never visibly detaches.
+
+   The box also bleeds --pad past the content edge: the visual stays a hairline
+   while the thing you can actually hit runs to the edge of the screen. */
 .mood-slider {
-  position: relative;
+  position: sticky;
+  bottom: calc(72px + env(safe-area-inset-bottom));
+  width: calc(100% + var(--pad));
+  margin-right: calc(-1 * var(--pad));
   flex: 1;
-  height: 52px;
+  min-height: 170px;
+  max-height: 360px;
   touch-action: none;
   cursor: pointer;
   outline: none;
+}
+
+/* Held: the track and thumb swell, then settle back on release. The control
+   acknowledging the finger is most of what makes a slider feel physical. */
+.mood-slider.dragging {
+  --track-w: 15px;
+  --thumb-d: 27px;
 }
 
 .mood-slider:focus-visible .mood-track {
   box-shadow: 0 0 0 2px var(--accent-tint), 0 0 0 3px var(--accent);
 }
 
+/* translateX(50%) against a `right` offset keeps the centre line fixed, so the
+   track grows about its own axis instead of drifting sideways. */
 .mood-track {
   position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 10px;
-  height: 10px;
+  top: 0;
+  bottom: 0;
+  right: var(--track-cx);
+  width: var(--track-w);
+  transform: translateX(50%);
   display: flex;
-  border-radius: 5px;
+  flex-direction: column;
+  border-radius: calc(var(--track-w) / 2);
   overflow: hidden;
   opacity: 0.32;
-  transition: opacity 0.22s ease;
+  transition: opacity 0.22s ease, width 0.2s ease, border-radius 0.2s ease;
 }
 
-.mood-slider.set .mood-track {
+.mood-slider.set .mood-track,
+.mood-slider.dragging .mood-track {
   opacity: 1;
 }
 
@@ -294,33 +364,42 @@ html, body {
   flex: 1;
 }
 
-/* Inset by the thumb's radius so index 0 and index max sit flush with the
-   track ends instead of overhanging them. */
+/* Zero-width: this is the centre line the thumb rides and the box the pointer
+   maths measures against, not something you see. It spans the full track —
+   a step rests at the middle of its band, so no end inset is wanted. */
 .mood-rail {
   position: absolute;
-  left: 11px;
-  right: 11px;
-  bottom: 10px;
-  height: 10px;
+  top: 0;
+  bottom: 0;
+  right: var(--track-cx);
+  width: 0;
   pointer-events: none;
 }
 
 .mood-thumb {
   position: absolute;
-  top: 50%;
-  width: 22px;
-  height: 22px;
+  left: 0;
+  width: var(--thumb-d);
+  height: var(--thumb-d);
   border-radius: 50%;
   border: 3px solid var(--bg);
   transform: translate(-50%, -50%);
   box-shadow: var(--shadow-thumb);
-  transition: left 0.14s cubic-bezier(0.16, 1, 0.3, 1), background 0.14s ease;
+  transition: top 0.4s var(--spring), background 0.2s ease,
+              width 0.2s ease, height 0.2s ease;
 }
 
+/* Under the finger the thumb IS the finger: no easing on position, or it lags
+   behind the touch and stops feeling like an object you're holding. */
+.mood-slider.dragging .mood-thumb {
+  transition: background 0.12s linear, width 0.2s ease, height 0.2s ease;
+}
+
+/* Left of the thumb — it floats over the note, so it carries its own pill. */
 .mood-label {
   position: absolute;
-  bottom: calc(100% + 12px);
-  transform: translateX(-50%);
+  right: calc(var(--track-w) / 2 + 12px);
+  transform: translateY(-50%);
   font-size: 0.82rem;
   font-weight: 600;
   letter-spacing: 0.01em;
@@ -330,29 +409,44 @@ html, body {
   padding: 3px 11px;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.18s ease, left 0.14s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: opacity 0.18s ease, top 0.4s var(--spring);
+}
+
+.mood-slider.dragging .mood-label {
+  transition: opacity 0.18s ease;
 }
 
 .mood-label.visible {
   opacity: 1;
 }
 
+/* Set sideways in the gutter beside the track, so it never crowds the note.
+   vertical-rl + rotate(180deg) reads bottom-to-top, following the drag. */
 .mood-hint {
   position: absolute;
-  left: 0;
-  bottom: calc(100% - 34px);
-  font-size: 0.74rem;
+  right: calc(var(--track-cx) + var(--track-w) / 2 + 7px);
+  bottom: 0;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 0.68rem;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
   color: var(--text-muted);
 }
 
+/* Sits on the track's line, not the column's — it reads as the cap of the rail. */
 .mood-clear {
+  width: var(--clear-d);
+  height: var(--clear-d);
+  margin-right: calc(var(--track-rest-w) / 2 - var(--clear-d) / 2);
+  margin-bottom: 6px;
   background: none;
   border: none;
   color: var(--text-muted);
   cursor: pointer;
-  padding: 6px;
-  margin-bottom: 4px;
   display: inline-flex;
+  align-items: center;
+  justify-content: center;
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.2s ease;
@@ -363,8 +457,14 @@ html, body {
   pointer-events: auto;
 }
 
+/* Position and size stop animating; the fades stay — they carry no motion. */
 @media (prefers-reduced-motion: reduce) {
-  .mood-thumb, .mood-label { transition: none; }
+  .mood-slider .mood-track,
+  .mood-slider.dragging .mood-track { transition: opacity 0.22s ease; }
+  .mood-slider .mood-thumb,
+  .mood-slider.dragging .mood-thumb { transition: background 0.2s ease; }
+  .mood-slider .mood-label,
+  .mood-slider.dragging .mood-label { transition: opacity 0.18s ease; }
 }
 
 /* ── Editor ── */
@@ -372,7 +472,7 @@ html, body {
 .editor-wrap {
   position: relative;
   flex: 1;
-  width: 100%;
+  min-width: 0;   /* flex sibling of the mood rail: shrink, don't overflow */
 }
 
 /* Shared typography — overlay and textarea must be pixel-identical. Both use
@@ -484,9 +584,11 @@ html, body {
   gap: 4px;
 }
 
+/* Centred on the mood rail's line, so the rail and the gear share the page's
+   right-hand axis. 20px = half the button (20px icon + 10px padding a side). */
 .bottom-btn-settings {
   position: absolute;
-  right: calc(var(--pad) - 10px);   /* 10px = the button's own padding */
+  right: calc(var(--rail-cx) - 20px);
 }
 
 .bottom-btn {

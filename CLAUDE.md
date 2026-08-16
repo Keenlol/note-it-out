@@ -110,7 +110,42 @@ pass/fail framing the app is built to avoid, and it's the worst possible choice
 for colour-blind readers. Temperature reads as weather, not as a grade.
 
 Use `moodColor(i)` for a step and `moodColorMix(f)` for a fractional value (an
-average) — the latter blends neighbouring steps via `color-mix`.
+average, or a thumb mid-drag) — the latter blends neighbouring steps via
+`color-mix`.
+
+### The right-hand axis
+
+`--rail-cx` = `--pad + --track-rest-w/2`: the mood rail's centre line, measured
+from the right edge of the screen. The heatmap grid ends on `--pad`, the rail's
+track sits just inside that same edge, and the settings gear is centred on the
+line. **Anything else pinned to the right derives its position from
+`--rail-cx`** — the page gets one vertical axis, not three, and it stays aligned
+if `--pad` ever changes. Nothing here is nudged by eye.
+
+The rail's hit area deliberately bleeds `--pad` past the content edge so it runs
+to the edge of the screen: the visual stays a hairline, the target is 68px wide.
+Keep that split — a thin control does not have to be a thin target.
+
+### Motion
+
+`--spring` (`cubic-bezier(0.34, 1.56, 0.64, 1)`) overshoots ~10% and settles.
+Use it for anything **landing on a position**; use plain `ease` for opacity and
+colour, which have nothing to overshoot.
+
+The mood slider is the reference for how interaction should feel, and it splits
+one gesture into two rates:
+
+- the **value** quantises the instant you cross a band — label swap plus a
+  `navigator.vibrate(8)` detent;
+- the **thumb** tracks the finger 1:1 with `transition: none`, and only springs
+  onto the grid when you let go.
+
+Snapping pixels mid-drag breaks the illusion of holding an object; that is why
+`.mood-slider.dragging` kills the position transition and nothing else does the
+positioning. Controls also **swell while held** (track 10→15px, thumb 22→27px)
+and settle back on release.
+
+Under `prefers-reduced-motion`, position and size stop animating; fades stay.
 
 ### Typography
 
@@ -189,7 +224,12 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 **Components:**
 - `App.tsx` — all state: viewed day, text, mood, cursor, sheets, theme. Swipe
   navigation, debounced auto-save (400 ms), tag suggestion computation.
-- `components/MoodSlider.tsx` — the day's mood. Discrete, label on drag only.
+- `components/MoodSlider.tsx` — the day's mood. A discrete vertical rail down
+  the right edge, warm end at the top; label on drag only. A step rests at the
+  **middle of its band**, not at the end of the track, and a touch anywhere in a
+  band selects it. Sticky, so a long note can scroll without putting the rail
+  out of thumb reach — which is why `.content` uses `overflow-x: clip` and not
+  `hidden` (`hidden` would make it a scroll container and neuter the sticky).
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
 - `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.
