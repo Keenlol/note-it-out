@@ -126,17 +126,28 @@ its position from `--rail-cx`** — the page gets one vertical axis, not three, 
 it stays aligned if `--pad` ever changes. Nothing here is nudged by eye.
 
 The layout that carries it: `.content` is two columns, `.content-main` (date +
-note) and a 44px `.mood-column` spacer. The rail is `position: fixed` between the
-graph and the dock — it is frame, not page, so it neither scrolls away from a
-long note nor slides up and leaves a hole above the dock. Being fixed, it has to
-be told where the graph ends: `--content-top`, set in App.tsx from the same
-measurement the sheet height uses. That is the one number CSS can't derive here,
-and `--dock-h` is what keeps the rail's foot off the dock — derive it, never
-restate it.
+note) and a `.mood-column` spacer exactly as wide as the visible track, with a
+`--pad` gap between them — so the note is inset from the rail by the same amount
+it's inset from the left edge of the screen. **That equality is the point; don't
+widen the spacer to make room for the rail's touch target.**
 
-The rail's hit area deliberately bleeds `--pad` past the content edge so it runs
-to the edge of the screen: the visual stays a hairline, the target is 68px wide.
-Keep that split — a thin control does not have to be a thin target.
+Three tokens place the rail and everything that follows it:
+
+- `--content-top` — where the graph ends. The one number CSS can't derive; set
+  in App.tsx from the same measurement the sheet height uses.
+- `--rail-y` = `--content-top + --rail-top` — where the rail starts.
+- `--rail-h` — half the distance from there to where a full-length rail would
+  meet a bottom-anchored dock.
+
+The rail is `position: fixed` (frame, not page: it neither scrolls away from a
+long note nor slides up and leaves a hole above the dock), and the dock is placed
+off the rail's foot rather than the screen's, so **changing `--rail-h` moves the
+buttons with it.** Nothing here is positioned by eye or restated.
+
+The rail's box is 44px against a 10px track: the visual stays a hairline, the
+target is a thumb. Keep that split — a thin control does not have to be a thin
+target — but keep the box clear of the note's last character, or it steals taps
+meant for the caret.
 
 ### Motion
 

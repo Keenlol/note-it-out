@@ -176,8 +176,6 @@ export function MoodSlider({ value, onChange, fade = 1 }: Props) {
             {moodLabel(value)}
           </div>
         </div>
-
-        {!isSet && <span className="mood-hint" aria-hidden="true">how the day felt</span>}
       </div>
     </div>
   )

@@ -66,11 +66,23 @@
   --track-rest-w: 10px;
   --rail-cx: calc(var(--pad) + var(--track-rest-w) / 2);
 
-  /* The dock at the foot of the rail. --dock-h is the space the rail must not
-     grow into; derive it, never restate it. */
+  /* The dock at the foot of the rail. Derive --dock-h, never restate it. */
   --dock-btn: 40px;
   --dock-gap: 6px;
   --dock-h: calc(3 * var(--dock-btn) + 2 * var(--dock-gap));
+
+  /* Where the rail starts and how long it runs. --content-top is set from
+     App.tsx (where the graph ends); --rail-top is the clearance it keeps from
+     the graph above and the dock below. The rail runs *half* the distance down
+     to where a full-length rail would meet the dock, and the dock is placed off
+     the rail's foot rather than the screen's — so shortening the rail lifts the
+     buttons with it and there is only one number to change. */
+  --rail-top: 12px;
+  --rail-y: calc(var(--content-top, 190px) + var(--rail-top));
+  --rail-h: max(140px, calc((
+    100dvh - var(--rail-y) - var(--rail-top) - var(--dock-h) - var(--pad)
+    - env(safe-area-inset-bottom)
+  ) / 2));
 }
 
 :root[data-theme='dark'] {
@@ -132,7 +144,9 @@ html, body {
   padding: 0 var(--pad) calc(var(--pad) + env(safe-area-inset-bottom));
   flex: 1;
   display: flex;
-  gap: 6px;
+  /* Same as the page's side padding: the note is inset from the rail by exactly
+     what it's inset from the left edge of the screen. */
+  gap: var(--pad);
   align-items: stretch;
   /* Clip, not hidden: `hidden` would make this a scroll container, and the
      mood rail's sticky offset would then resolve against a box that never
@@ -310,40 +324,38 @@ html, body {
    The label only surfaces while the thumb is down; the colour is the permanent
    readout, and a permanently visible grade would make the day feel scored.   */
 
+/* Only a spacer: it holds open exactly the width of the visible track, so the
+   note clears the rail and nothing more. `.content`'s gap supplies the space
+   between them, which is why that gap is --pad — the note then sits the same
+   distance from the rail as it does from the left edge of the screen.
+
+   The rail itself is taken out of flow below; its touch target is wider than
+   this and overhangs into the gap, where there is nothing to steal taps from. */
 .mood-column {
   --track-w: var(--track-rest-w);
   --thumb-d: 22px;
-  /* How far the rail clears the graph above it and the dock below it. */
-  --rail-top: 12px;
-
-  /* The slider's box bleeds exactly --pad into the gutter, so it ends on the
-     screen edge — which makes --rail-cx read the same from either edge, and
-     puts the track's right edge on the heatmap's right edge. */
+  /* --rail-cx is measured from the screen's right edge and the rail's box ends
+     there, so the same number puts the track's right edge on the heatmap's. */
   --track-cx: var(--rail-cx);
 
-/* Only a spacer: it holds the gutter open in the flow so the note never runs
-   under the rail. The rail itself is taken out of flow below. */
   flex: none;
-  width: 44px;
+  width: var(--track-rest-w);
 }
 
-/* Fixed, spanning graph to dock. The rail is frame, not page: it shouldn't
-   scroll away from a long note, and it shouldn't slide up and leave a hole
-   above the dock either, which is what a sticky offset in one direction gives
-   you. Being fixed, it needs to be told where the graph ends — that is
-   --content-top, measured in App.tsx, the one thing here CSS can't derive.
+/* Fixed, hanging off the foot of the graph. The rail is frame, not page: it
+   shouldn't scroll away from a long note, and it shouldn't slide up and leave a
+   hole above the dock either, which is what a sticky offset in one direction
+   gives you.
 
-   The box also bleeds --pad past the content edge: the visual stays a hairline
-   while the thing you can actually hit runs to the edge of the screen. */
+   44px wide against a 10px track: the visual stays a hairline while the thing
+   you can hit is a thumb. It runs to the screen edge and overhangs the gap on
+   the other side, staying clear of the note's last character. */
 .mood-slider {
   position: fixed;
   right: 0;
-  top: calc(var(--content-top, 190px) + var(--rail-top));
-  bottom: calc(
-    var(--dock-h) + var(--rail-top) + var(--pad) + env(safe-area-inset-bottom)
-  );
-  width: calc(44px + var(--pad));
-  min-height: 170px;
+  top: var(--rail-y);
+  height: var(--rail-h);
+  width: 44px;
   touch-action: none;
   cursor: pointer;
   outline: none;
@@ -440,20 +452,6 @@ html, body {
 
 .mood-label.visible {
   opacity: 1;
-}
-
-/* Set sideways in the gutter beside the track, so it never crowds the note.
-   vertical-rl + rotate(180deg) reads bottom-to-top, following the drag. */
-.mood-hint {
-  position: absolute;
-  right: calc(var(--track-cx) + var(--track-w) / 2 + 7px);
-  bottom: 0;
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  font-size: 0.68rem;
-  letter-spacing: 0.02em;
-  white-space: nowrap;
-  color: var(--text-muted);
 }
 
 /* Position and size stop animating; the fades stay — they carry no motion. */
@@ -572,7 +570,7 @@ html, body {
 .dock {
   position: fixed;
   right: calc(var(--rail-cx) - var(--dock-btn) / 2);
-  bottom: calc(var(--pad) + env(safe-area-inset-bottom));
+  top: calc(var(--rail-y) + var(--rail-h) + var(--rail-top));
   z-index: 30;
   display: flex;
   flex-direction: column;
