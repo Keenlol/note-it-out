@@ -36,6 +36,32 @@ Avoid anything that turns the log into a scoreboard: no streaks on "good" days,
 no completion percentages, no grading. Streaks and trends belong to tags, not to
 the mood axis.
 
+## Current state
+
+v1, built in one pass. Everything described below is implemented and working.
+Known-incomplete, in priority order:
+
+- **Icons are placeholders** (`public/favicon.svg`, `public/icon-maskable.svg` →
+  the PNGs are rendered from them). Real art is pending.
+- **No deployment yet.** `vercel.json` is ready; the project just needs importing
+  at vercel.com/new. Note that note-it-down lives on a *different* Vercel account
+  from the one Claude Code's MCP integration can reach — ask before creating one.
+- **Mood labels are unvalidated** — `rough / low / okay / good / great`. They're
+  one array in `utils/mood.ts` and the scale length derives from it, so moving to
+  7 steps means the array plus two more `--mood-N` pairs in `index.css`.
+
+**Deliberately deferred, do not add without being asked:**
+
+- **A second mood axis.** This was considered at length and cut for v1. If it
+  comes back, the ranked shortlist is: tense↔calm (Thayer's tense arousal,
+  actionable and genuinely orthogonal to valence), then drained↔wired (Russell
+  circumplex, best-validated), then passive↔agentic (PAD dominance — best
+  thematic fit but correlates with valence, wasting the dimension). If added, the
+  encoding is hue = valence, vividness = the second axis, with the second axis
+  capped at ~3 steps since saturation resolution is worse than hue resolution at
+  cell size.
+- **Per-occurrence tag counting** (`#tag x2`). Day granularity is the decision.
+
 ## Design system
 
 All new UI must follow these tokens and patterns. Do not introduce new values — extend from these.
