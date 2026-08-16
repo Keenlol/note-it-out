@@ -1,9 +1,10 @@
 import { PREFIX, getAllDays, deleteDay, type DayData } from './storage'
 import { buildTagCatalog, MIN_MOOD_DAYS } from './tags'
-import { MOOD_LEVELS, moodLabel } from './mood'
+import { MOOD_LEVELS, MOOD_MAX, moodLabel } from './mood'
 
 export const EXPORT_APP = 'note-it-out'
-export const EXPORT_VERSION = 1
+/** 1 = the 5-step mood scale; 2 = the 7-step scale. See applyImport. */
+export const EXPORT_VERSION = 2
 
 export interface ExportFile {
   app: string
@@ -147,20 +148,28 @@ export function parseImport(text: string): ExportFile {
   }
   return {
     app: EXPORT_APP,
-    version: file.version ?? EXPORT_VERSION,
+    // No version field at all predates versioning, so it's the oldest format.
+    version: file.version ?? 1,
     exportedAt: file.exportedAt ?? '',
     days: file.days,
   }
 }
 
-/** Writes imported days over any existing record for the same date. */
+/**
+ * Writes imported days over any existing record for the same date.
+ *
+ * A version-1 file was written on the 5-step scale, whose steps are the middle
+ * five of the current seven — so its moods shift up by one, the same move
+ * migrateMoodScale makes to local days.
+ */
 export function applyImport(file: ExportFile): number {
   let written = 0
+  const shift = file.version < 2 ? 1 : 0
   for (const day of file.days) {
     const record: DayData = {
       date: day.date,
       rawText: typeof day.rawText === 'string' ? day.rawText : '',
-      mood: typeof day.mood === 'number' ? day.mood : null,
+      mood: typeof day.mood === 'number' ? Math.min(MOOD_MAX, day.mood + shift) : null,
       savedAt: typeof day.savedAt === 'number' ? day.savedAt : Date.now(),
     }
     if (record.rawText.trim() === '' && record.mood === null) continue

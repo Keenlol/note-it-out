@@ -34,12 +34,16 @@
      21×7 a normal hairline turns the whole grid into a wireframe. */
   --cell-line:  #f0e9dd;
 
-  /* Mood ramp: cool → warm. Index matches MOOD_LEVELS in utils/mood.ts. */
-  --mood-0: #6d8aa4;
-  --mood-1: #9db1bf;
-  --mood-2: #cdc3b3;
-  --mood-3: #e6ab5c;
-  --mood-4: #ec9418;
+  /* Mood ramp: cool → warm. Index matches MOOD_LEVELS in utils/mood.ts.
+     Light is a valley — both ends darken, the neutral middle is the lightest
+     step — so intensity reads the same going either way from centre. */
+  --mood-0: #4e6b86;
+  --mood-1: #6d8aa4;
+  --mood-2: #9db1bf;
+  --mood-3: #cdc3b3;
+  --mood-4: #e6ab5c;
+  --mood-5: #ec9418;
+  --mood-6: #dd7a0e;
 
   --shadow-thumb: 0 1px 5px rgba(44, 38, 32, 0.22);
 
@@ -82,11 +86,15 @@
   --cell-noted: #2a251d;
   --cell-line:  #241f18;
 
-  --mood-0: #4d6b85;
-  --mood-1: #6d8497;
-  --mood-2: #7d7365;
-  --mood-3: #c98f38;
-  --mood-4: #e8a02a;
+  /* Dark is a climb, not a valley: on this background the cool end has to give
+     up brightness to read as cool at all, so the ramp brightens all the way. */
+  --mood-0: #3b5a72;
+  --mood-1: #4d6b85;
+  --mood-2: #6d8497;
+  --mood-3: #7d7365;
+  --mood-4: #c98f38;
+  --mood-5: #e8a02a;
+  --mood-6: #f2ac35;
 
   --shadow-thumb: 0 1px 6px rgba(0, 0, 0, 0.5);
 }

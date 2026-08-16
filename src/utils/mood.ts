@@ -1,8 +1,14 @@
-// The mood scale. One axis, bad → good, five discrete steps.
+// The mood scale. One axis, bad → good, seven discrete steps.
 //
-// Five (not a continuous slider) because the palette caps the useful
+// Seven (not a continuous slider) because the palette caps the useful
 // resolution: past ~7 shades, two cells in the heatmap are indistinguishable,
-// so a finer scale would record a precision you can't see or reproduce.
+// so a finer scale would record a precision you can't see or reproduce. This is
+// the ceiling — don't add an eighth.
+//
+// It was five until the ends were extended outward: `bleak` and `bright` widen
+// the range without disturbing the five in the middle, so a day that used to
+// read `great` still reads `great` (see migrateMoodScale in storage.ts). The
+// neutral step stays dead centre, which is the point of an odd-length scale.
 //
 // Labels are deliberately physical/plain rather than evaluative or clinical —
 // they describe a state, they don't grade a day. They surface only while the
@@ -14,11 +20,13 @@ export interface MoodLevel {
 }
 
 export const MOOD_LEVELS: MoodLevel[] = [
-  { value: 0, label: 'rough' },
-  { value: 1, label: 'low' },
-  { value: 2, label: 'okay' },
-  { value: 3, label: 'good' },
-  { value: 4, label: 'great' },
+  { value: 0, label: 'bleak' },
+  { value: 1, label: 'rough' },
+  { value: 2, label: 'low' },
+  { value: 3, label: 'okay' },
+  { value: 4, label: 'good' },
+  { value: 5, label: 'great' },
+  { value: 6, label: 'bright' },
 ]
 
 export const MOOD_COUNT = MOOD_LEVELS.length
