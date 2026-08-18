@@ -74,15 +74,23 @@
   /* Where the rail starts and how long it runs. --content-top is set from
      App.tsx (where the graph ends); --rail-top is the clearance it keeps from
      the graph above and the dock below. The rail runs *half* the distance down
-     to where a full-length rail would meet the dock, and the dock is placed off
-     the rail's foot rather than the screen's — so shortening the rail lifts the
-     buttons with it and there is only one number to change. */
+     to where a full-length rail would meet the dock, scaled by --rail-scale,
+     and the dock is placed off the rail's foot rather than the screen's — so
+     shortening the rail lifts the buttons with it and there is only one number
+     to change.
+
+     The height it divides is --vh-stable, not 100dvh: the viewport meta is
+     `interactive-widget=resizes-content`, so a software keyboard shortens the
+     layout viewport and 100dvh with it, which would shrink the rail and drag
+     the dock up mid-sentence. --vh-stable is set in App.tsx and holds the
+     keyboard-free height. Nothing on this axis may size off 100dvh. */
   --rail-top: 12px;
   --rail-y: calc(var(--content-top, 190px) + var(--rail-top));
-  --rail-h: max(140px, calc((
-    100dvh - var(--rail-y) - var(--rail-top) - var(--dock-h) - var(--pad)
+  --rail-scale: 0.75;
+  --rail-h: calc(var(--rail-scale) * max(140px, calc((
+    var(--vh-stable, 100dvh) - var(--rail-y) - var(--rail-top) - var(--dock-h) - var(--pad)
     - env(safe-area-inset-bottom)
-  ) / 2));
+  ) / 2)));
 }
 
 :root[data-theme='dark'] {

@@ -178,6 +178,33 @@ export function App() {
     })
   }
 
+  // ── Frame geometry ──────────────────────────────────────────────────────
+  // The keyboard-free viewport height, for anything on the right-hand axis.
+  // With `interactive-widget=resizes-content` a software keyboard shortens the
+  // layout viewport, so sizing the rail off 100dvh makes it shrink and pull the
+  // dock up while you type. Hold the tallest height seen at this width instead:
+  // the keyboard only ever shrinks it, and a rotation changes the width, which
+  // resets the measurement.
+  useEffect(() => {
+    let width = 0
+    let tallest = 0
+    const update = () => {
+      const w = window.visualViewport?.width ?? window.innerWidth
+      const h = window.visualViewport?.height ?? window.innerHeight
+      if (w !== width) { width = w; tallest = 0 }
+      if (h <= tallest) return
+      tallest = h
+      document.documentElement.style.setProperty('--vh-stable', `${h}px`)
+    }
+    update()
+    window.addEventListener('resize', update)
+    window.visualViewport?.addEventListener('resize', update)
+    return () => {
+      window.removeEventListener('resize', update)
+      window.visualViewport?.removeEventListener('resize', update)
+    }
+  }, [])
+
   // ── Sheets ──────────────────────────────────────────────────────────────
   const anySheetOpen = tagSheetOpen || settingsOpen
   const manualHeight = useRef(getSavedSheetHeight() !== undefined)

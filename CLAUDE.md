@@ -131,18 +131,28 @@ note) and a `.mood-column` spacer exactly as wide as the visible track, with a
 it's inset from the left edge of the screen. **That equality is the point; don't
 widen the spacer to make room for the rail's touch target.**
 
-Three tokens place the rail and everything that follows it:
+Four tokens place the rail and everything that follows it:
 
 - `--content-top` — where the graph ends. The one number CSS can't derive; set
   in App.tsx from the same measurement the sheet height uses.
+- `--vh-stable` — the keyboard-free viewport height, also set in App.tsx: the
+  tallest height seen at the current viewport width. See below.
 - `--rail-y` = `--content-top + --rail-top` — where the rail starts.
 - `--rail-h` — half the distance from there to where a full-length rail would
-  meet a bottom-anchored dock.
+  meet a bottom-anchored dock, times `--rail-scale` (0.75). Change the scale,
+  not the formula.
 
 The rail is `position: fixed` (frame, not page: it neither scrolls away from a
 long note nor slides up and leaves a hole above the dock), and the dock is placed
 off the rail's foot rather than the screen's, so **changing `--rail-h` moves the
 buttons with it.** Nothing here is positioned by eye or restated.
+
+**Nothing on this axis may size off `100dvh`.** The viewport meta is
+`interactive-widget=resizes-content`, so an Android software keyboard shortens
+the layout viewport — and a rail measured against `dvh` shrinks, taking the dock
+up with it, every time you start typing. `--vh-stable` only ever grows at a given
+width, so the keyboard can't move the rail; a rotation changes the width and
+resets the measurement.
 
 The rail's box is 44px against a 10px track: the visual stays a hairline, the
 target is a thumb. Keep that split — a thin control does not have to be a thin
