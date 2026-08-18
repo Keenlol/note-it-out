@@ -9,7 +9,7 @@ import {
   exportFilename, formatBytes, getStats, parseImport, type ExportFile,
 } from '../utils/data'
 import { tap } from '../utils/tap'
-import { CAN_VIBRATE } from '../utils/haptics'
+import type { FeedbackPref } from '../utils/feedback'
 
 const THEMES: SegOption<ThemePref>[] = [
   { value: 'light', label: 'Light' },
@@ -17,8 +17,9 @@ const THEMES: SegOption<ThemePref>[] = [
   { value: 'auto', label: 'Auto' },
 ]
 
-const SWITCH: SegOption<'on' | 'off'>[] = [
-  { value: 'on', label: 'On' },
+const FEEDBACK: SegOption<FeedbackPref>[] = [
+  { value: 'vibrate', label: 'Vibrate' },
+  { value: 'click', label: 'Click' },
   { value: 'off', label: 'Off' },
 ]
 
@@ -35,8 +36,8 @@ interface Props {
   dataVersion: number
   theme: ThemePref
   onThemeChange: (pref: ThemePref) => void
-  haptics: boolean
-  onHapticsChange: (on: boolean) => void
+  feedback: FeedbackPref
+  onFeedbackChange: (pref: FeedbackPref) => void
   onDataChanged: () => void
 }
 
@@ -47,7 +48,7 @@ function hour12(h: number): string {
 }
 
 export function SettingsSheet({
-  open, onClose, dataVersion, theme, onThemeChange, haptics, onHapticsChange, onDataChanged,
+  open, onClose, dataVersion, theme, onThemeChange, feedback, onFeedbackChange, onDataChanged,
 }: Props) {
   const [confirm, setConfirm] = useState<ConfirmState>({ kind: 'none' })
   const fileRef = useRef<HTMLInputElement>(null)
@@ -98,20 +99,15 @@ export function SettingsSheet({
           <SegmentedControl options={THEMES} value={theme} onChange={onThemeChange} />
         </div>
 
-        {CAN_VIBRATE && (
-          <div className="settings-section">
-            <span className="settings-section-label">Haptics</span>
-            <p className="settings-section-hint">
-              A small tick each time the mood slider crosses into the next colour.
-              Needs a phone with a vibration motor.
-            </p>
-            <SegmentedControl
-              options={SWITCH}
-              value={haptics ? 'on' : 'off'}
-              onChange={v => onHapticsChange(v === 'on')}
-            />
-          </div>
-        )}
+        <div className="settings-section">
+          <span className="settings-section-label">Detent</span>
+          <p className="settings-section-hint">
+            How the mood slider marks each crossing into the next colour. Vibrate
+            needs a phone with a motor and the system's own haptics switched on;
+            Click is a sound, for a laptop. Picking one plays it.
+          </p>
+          <SegmentedControl options={FEEDBACK} value={feedback} onChange={onFeedbackChange} />
+        </div>
 
         <div className="settings-section">
           <span className="settings-section-label">Your data</span>

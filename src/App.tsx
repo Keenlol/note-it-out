@@ -13,10 +13,10 @@ import { moodColor } from './utils/mood'
 import { tagFrequency } from './utils/tags'
 import { formatDisplayDate } from './utils/format'
 import { weekOffsetForDate } from './utils/window'
-import { getSavedHaptics, getSavedTheme, saveHaptics, saveTheme } from './utils/settings'
+import { getSavedFeedback, getSavedTheme, saveFeedback, saveTheme } from './utils/settings'
 import { applyTheme, msUntilNextFlip, resolveTheme, type ThemePref } from './utils/theme'
 import { tap } from './utils/tap'
-import { detent } from './utils/haptics'
+import { detent, type FeedbackPref } from './utils/feedback'
 
 const SAVE_DELAY = 400
 const SAVED_FLASH_MS = 1200
@@ -43,7 +43,7 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const [themePref, setThemePref] = useState<ThemePref>(() => getSavedTheme())
-  const [haptics, setHaptics] = useState<boolean>(() => getSavedHaptics())
+  const [feedback, setFeedback] = useState<FeedbackPref>(() => getSavedFeedback())
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const heatmapRef = useRef<HTMLDivElement>(null)
@@ -141,11 +141,11 @@ export function App() {
     saveTheme(pref)
   }
 
-  const handleHapticsChange = (on: boolean) => {
-    setHaptics(on)
-    saveHaptics(on)
-    // Confirm the choice in the language of the choice.
-    detent(on)
+  const handleFeedbackChange = (pref: FeedbackPref) => {
+    setFeedback(pref)
+    saveFeedback(pref)
+    // Answer in the language of the choice — picking one is also how you audition it.
+    detent(pref)
   }
 
   // ── Tag autocomplete ────────────────────────────────────────────────────
@@ -412,7 +412,7 @@ export function App() {
           value={mood}
           onChange={handleMoodChange}
           fade={noteOpacity}
-          haptics={haptics}
+          feedback={feedback}
         />
       </div>
 
@@ -459,8 +459,8 @@ export function App() {
         dataVersion={dataVersion}
         theme={themePref}
         onThemeChange={handleThemeChange}
-        haptics={haptics}
-        onHapticsChange={handleHapticsChange}
+        feedback={feedback}
+        onFeedbackChange={handleFeedbackChange}
         onDataChanged={() => {
           // Imports and wipes replace what's under us — reload the viewed day.
           loadedDate.current = null

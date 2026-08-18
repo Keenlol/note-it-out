@@ -1,7 +1,9 @@
 import type { ThemePref } from './theme'
+import type { FeedbackPref } from './feedback'
 
 const THEME_KEY = 'setting_theme'
-const HAPTICS_KEY = 'setting_haptics'
+const FEEDBACK_KEY = 'setting_feedback'
+const HAPTICS_KEY = 'setting_haptics'   // the older on/off switch, read once below
 
 export function getSavedTheme(): ThemePref {
   const v = localStorage.getItem(THEME_KEY)
@@ -12,13 +14,16 @@ export function saveTheme(pref: ThemePref): void {
   localStorage.setItem(THEME_KEY, pref)
 }
 
-/** Haptic detents on the mood slider. On by default — the detent is part of
- *  how the slider is meant to feel, and it no-ops on hardware without a motor
- *  anyway. Only an explicit 'off' turns it off. */
-export function getSavedHaptics(): boolean {
-  return localStorage.getItem(HAPTICS_KEY) !== 'off'
+/** How the mood slider marks a band crossing. Vibrate by default — the detent
+ *  is part of how the slider is meant to feel, and it no-ops on hardware
+ *  without a motor. Falls back to whatever the older haptics switch said, so an
+ *  install that had turned it off stays off. */
+export function getSavedFeedback(): FeedbackPref {
+  const v = localStorage.getItem(FEEDBACK_KEY)
+  if (v === 'vibrate' || v === 'click' || v === 'off') return v
+  return localStorage.getItem(HAPTICS_KEY) === 'off' ? 'off' : 'vibrate'
 }
 
-export function saveHaptics(on: boolean): void {
-  localStorage.setItem(HAPTICS_KEY, on ? 'on' : 'off')
+export function saveFeedback(pref: FeedbackPref): void {
+  localStorage.setItem(FEEDBACK_KEY, pref)
 }

@@ -204,11 +204,15 @@ The mood slider is the reference for how interaction should feel, and it splits
 one gesture into two rates:
 
 - the **value** quantises the instant you cross a band — label swap plus a
-  `detent()` (`utils/haptics.ts`, a 12 ms pulse; under ~10 ms many Android
-  motors never spin up far enough to be felt). It is the app's **only** haptic
-  and should stay that way — a phone that buzzes at everything gets muted.
-  Settings can turn it off, and hides the toggle where `navigator.vibrate` does
-  not exist at all (iOS);
+  `detent()` (`utils/feedback.ts`). It is the app's **only** feedback event and
+  should stay that way: a device that reacts to everything gets switched off.
+  Settings picks how it lands — `vibrate | click | off` — and that is a *choice*,
+  not a capability check, deliberately. `navigator.vibrate` exists in desktop
+  Chrome and Firefox and silently does nothing, and no web API can drive a Mac's
+  trackpad haptics at all, so nothing can be reliably detected here; the person
+  holding the device is the only one who knows what it is. The pulse is 20 ms —
+  under ~15 ms many Android phones deliver nothing you can feel — and the click
+  is a 18 ms WebAudio tick built on the first detent, inside the gesture;
 - the **thumb** tracks the finger 1:1 with `transition: none`, and only springs
   onto the grid when you let go.
 
@@ -301,7 +305,7 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `utils/tags.ts` — `buildTagCatalog` aggregates across days. Tags are counted
   **per day, not per occurrence**.
 - `utils/mood.ts` — the scale, labels and colour helpers.
-- `utils/haptics.ts` — the detent pulse, the on/off call, and `CAN_VIBRATE`.
+- `utils/feedback.ts` — the detent, as a buzz or as a click.
 - `utils/theme.ts`, `utils/settings.ts`, `utils/data.ts` (export/import/stats),
   `utils/window.ts` (21-week heatmap geometry), `utils/format.ts`, `utils/tap.ts`.
 
