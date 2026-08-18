@@ -1,10 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Search, X } from 'lucide-react'
 import { SheetClose } from './SheetClose'
 import { SegmentedControl, type SegOption } from './SegmentedControl'
 import { getAllDays } from '../utils/storage'
-import { buildTagCatalog, getTagDays, MIN_MOOD_DAYS, type TagStat } from '../utils/tags'
-import { moodColorMix, moodLabel, MOOD_MAX } from '../utils/mood'
+import { buildTagCatalog, getTagDays, type TagStat } from '../utils/tags'
+import { moodColorMix, MOOD_MAX } from '../utils/mood'
 import { formatShortDate } from '../utils/format'
 import { tap } from '../utils/tap'
 
@@ -21,6 +21,9 @@ interface Props {
   onClose: () => void
   dataVersion: number
   onDayClick: (date: string) => void
+  /** The days an expanded tag covers, for the heatmap to filter down to.
+   *  null whenever nothing is expanded (or the sheet is shut). */
+  onFilterDays: (dates: string[] | null) => void
 }
 
 function sortTags(tags: TagStat[], sort: Sort): TagStat[] {
@@ -46,7 +49,7 @@ function sortTags(tags: TagStat[], sort: Sort): TagStat[] {
 }
 
 export function TagSheet({
-  open, onClose, dataVersion, onDayClick,
+  open, onClose, dataVersion, onDayClick, onFilterDays,
 }: Props) {
   const [sort, setSort] = useState<Sort>('most')
   const [query, setQuery] = useState('')
@@ -65,6 +68,15 @@ export function TagSheet({
     () => (expanded ? getTagDays(expanded, days) : []),
     [expanded, days],
   )
+
+  // Expanding a tag turns the graph above into a view of *that tag*: the days
+  // carrying it keep their colour, everything else goes blank. The list and the
+  // graph are then the same answer at two scales. Gated on `open` as well, so a
+  // shut sheet never leaves the graph filtered behind it.
+  useEffect(() => {
+    onFilterDays(open && expanded ? expandedDays.map(d => d.date) : null)
+    return () => onFilterDays(null)
+  }, [open, expanded, expandedDays, onFilterDays])
 
   return (
     <div className={`sheet${open ? ' open' : ''}`}>
@@ -104,51 +116,36 @@ export function TagSheet({
 
         {visible.map(t => {
           const isOpen = expanded === t.name
+          const rated = t.moodAvg !== null
           return (
             <div key={t.name} className="tag-item-wrap">
               <div
                 className="tag-item"
+                // The tag's own colour, for the dot and the name it sits in
+                // front of. Only set when there is something to average.
+                data-rated={rated ? '' : undefined}
+                style={rated
+                  ? ({ '--row-mood': moodColorMix(t.moodAvg as number) } as React.CSSProperties)
+                  : undefined}
                 onPointerDown={tap}
                 onClick={() => setExpanded(isOpen ? null : t.name)}
               >
+                <span className="tag-dot" aria-hidden="true" />
                 <span className="tag-name">#{t.display}</span>
+
+                {t.delta !== null && (
+                  <span className={`tag-delta${t.delta >= 0 ? ' up' : ' down'}`}>
+                    {t.delta >= 0 ? '+' : '−'}{Math.abs(t.delta).toFixed(1)}
+                  </span>
+                )}
                 <span className="tag-count">
-                  {t.days} {t.days === 1 ? 'day' : 'days'}
+                  {t.days}{t.days === 1 ? ' day' : ' days'}
                 </span>
-              </div>
-
-              <div className="tag-inner">
-                {t.moodAvg !== null ? (
-                  <div className="tag-mood">
-                    <span
-                      className="tag-mood-dot"
-                      style={{ background: moodColorMix(t.moodAvg) }}
-                      aria-hidden="true"
-                    />
-                    <span className="tag-mood-text">
-                      averages <strong>{moodLabel(Math.round(t.moodAvg))}</strong>
-                      {' '}({t.moodAvg.toFixed(1)}/{MOOD_MAX}) over {t.moodDays} rated
-                      {' '}{t.moodDays === 1 ? 'day' : 'days'}
-                    </span>
-                  </div>
-                ) : (
-                  <div className="tag-mood">
-                    <span className="tag-mood-text">no rated days yet</span>
-                  </div>
-                )}
-
-                {t.delta !== null ? (
-                  <div className={`tag-delta${t.delta >= 0 ? ' up' : ' down'}`}>
-                    {t.delta >= 0 ? '+' : '−'}{Math.abs(t.delta).toFixed(2)}
-                    <span className="tag-delta-label">vs. days without it</span>
-                  </div>
-                ) : (
-                  <div className="tag-delta muted">
-                    <span className="tag-delta-label">
-                      needs {MIN_MOOD_DAYS} rated days on each side to compare
-                    </span>
-                  </div>
-                )}
+                <span className="tag-score">
+                  {rated
+                    ? <>{(t.moodAvg as number).toFixed(1)}<em>/{MOOD_MAX}</em></>
+                    : <em>—</em>}
+                </span>
               </div>
 
               {isOpen && (

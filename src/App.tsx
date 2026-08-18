@@ -40,6 +40,8 @@ export function App() {
   const [savedFlash, setSavedFlash] = useState(false)
 
   const [tagSheetOpen, setTagSheetOpen] = useState(false)
+  // Days an expanded tag covers. Non-null narrows the graph to just those.
+  const [filterDates, setFilterDates] = useState<Set<string> | null>(null)
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const [themePref, setThemePref] = useState<ThemePref>(() => getSavedTheme())
@@ -55,6 +57,11 @@ export function App() {
   const loadedDate = useRef<string | null>(null)
 
   const bumpVersion = useCallback(() => setDataVersion(v => v + 1), [])
+
+  // Stable: TagSheet reports through this from an effect.
+  const handleFilterDays = useCallback((dates: string[] | null) => {
+    setFilterDates(dates === null ? null : new Set(dates))
+  }, [])
 
   // ── Saving ──────────────────────────────────────────────────────────────
   // A pending edit is always tagged with the day it belongs to, so switching
@@ -367,6 +374,7 @@ export function App() {
           dataVersion={dataVersion}
           weekOffset={weekOffsetForDate(viewDate)}
           liveDay={{ date: currentDate, mood, hasText: text.trim() !== '' }}
+          filterDates={filterDates}
         />
       </div>
 
@@ -449,6 +457,7 @@ export function App() {
       <TagSheet
         open={tagSheetOpen}
         onClose={() => setTagSheetOpen(false)}
+        onFilterDays={handleFilterDays}
         dataVersion={dataVersion}
         onDayClick={goToDate}
       />

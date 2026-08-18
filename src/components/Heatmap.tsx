@@ -22,6 +22,12 @@ interface Props {
    * re-reading (and re-parsing) every stored day on each step.
    */
   liveDay?: { date: string; mood: number | null; hasText: boolean }
+  /**
+   * When set, only these days are drawn — every other day renders exactly as an
+   * untouched one. Applied at render time, next to `liveDay` and for the same
+   * reason: expanding a tag must not re-read and re-parse every stored day.
+   */
+  filterDates?: Set<string> | null
 }
 
 const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec']
@@ -46,7 +52,9 @@ function cellStyle(cell: Cell): React.CSSProperties {
   return { background: 'transparent', borderColor: 'var(--cell-line)' }
 }
 
-export function Heatmap({ onDayClick, selectedDate, dataVersion, weekOffset = 0, liveDay }: Props) {
+export function Heatmap({
+  onDayClick, selectedDate, dataVersion, weekOffset = 0, liveDay, filterDates,
+}: Props) {
   const { weeks, monthLabels } = useMemo(() => {
     const today = new Date()
     today.setHours(0, 0, 0, 0)
@@ -102,9 +110,13 @@ export function Heatmap({ onDayClick, selectedDate, dataVersion, weekOffset = 0,
         {weeks.map((col, w) => (
           <div key={w} className="heatmap-col">
             {col.map((raw, d) => {
-              const cell = liveDay && raw.date === liveDay.date
+              const live = liveDay && raw.date === liveDay.date
                 ? { ...raw, mood: liveDay.mood, hasText: liveDay.hasText }
                 : raw
+              // Filtered out: keep the cell, drop everything it had to say.
+              const cell = filterDates && live.date !== null && !filterDates.has(live.date)
+                ? { ...live, mood: null, hasText: false }
+                : live
               const selected = (cell.date !== null && cell.date === selectedDate)
                 || (cell.isToday && selectedDate === null)
               return (

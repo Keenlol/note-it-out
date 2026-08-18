@@ -329,6 +329,10 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
 - `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.
+  Each tag is **one row**: mood dot, name in that colour, day count, average
+  score. There is no description box — a stat that needs a sentence belongs in
+  the expansion. Expanding a row lists the days *and* filters the heatmap (see
+  below); collapsing or closing the sheet clears the filter.
 - `components/SheetClose.tsx` — the X every panel opens with, on the rail axis.
 - `components/SettingsSheet.tsx` — theme, data stats, export/import/clear.
 
@@ -345,6 +349,12 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - The heatmap has **three cell states** and they must stay distinguishable:
   mood set (temperature colour), note but no mood (`--cell-noted`), nothing
   (outline only). Empty must read as *absence*, never as the low end of the scale.
+- `Heatmap` takes an optional `filterDates`. Non-null means **only these days
+  exist**: every other cell renders as an untouched day, so expanding a tag turns
+  the graph into a picture of that tag. Applied at render time next to `liveDay`,
+  for the same reason — filtering must not re-read and re-parse every stored day.
+  The 0.18s background transition on `.heatmap-cell` makes it read as a lens
+  rather than a redraw; that transition is load-bearing, don't remove it.
 - `Heatmap` takes a `liveDay` prop applied over the memoized grid **at render
   time, not inside the memo**, so dragging the slider repaints its cell without
   re-reading and re-parsing every stored day on each step.
