@@ -141,10 +141,18 @@ average, or a thumb mid-drag) — the latter blends neighbouring steps via
 A `#tag` in the note is painted with the mood of the day it was written on, not
 with a fixed highlight: the day has one temperature and everything written that
 day belongs to it. `App.tsx` publishes `--day-mood` and a `data-mood` attribute
-on `.app`; `.tag` reads it through relative colour syntax, keeping the mood's
-**hue** and clamping only lightness and chroma into the band ink can live in
-(`--ink-l-min/max`, `--ink-c-min/max`, per theme). The chroma *floor* matters —
-without it a flat day's tags would be indistinguishable from prose.
+on `.app`, and `.app[data-mood]` turns that into the **two tokens everything
+else reads**: `--day-ink` (relative colour syntax — the mood's **hue** kept,
+lightness and chroma clamped into the band text can live in via
+`--ink-l-min/max` and `--ink-c-min/max`, per theme) and `--day-tint` (the same
+colour at 14%, for anything that needs a wash behind the ink). The chroma
+*floor* matters — without it a flat day's tags would be indistinguishable from
+prose.
+
+Three things wear it: `.tag`, the autocomplete chips, and the **Today** pill in
+the title row, which sits in that day's note and so belongs to it too. Anything
+else that lives inside a single day should read `--day-ink`/`--day-tint` rather
+than re-deriving the expression.
 
 No mood set → no `data-mood` → plain `--accent`, as before. The whole rule is
 inside `@supports (color: oklch(from red l c h))`, so anything without relative

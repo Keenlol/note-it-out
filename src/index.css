@@ -330,15 +330,36 @@ html, body {
   color: var(--text-2);
 }
 
+/* A pill, not a word. It's the only control in the note column, it appears
+   without warning when you swipe into the past, and a bare coloured word next
+   to a date reads as part of the date. Tint, hairline and a tap target make it
+   look like the way back that it is.
+
+   It carries the viewed day's mood for the same reason the tags do — it sits in
+   that day's note — and takes its two colours from the same tokens, so there is
+   one definition of "the day's colour as ink" in the file. */
 .jump-today {
-  background: none;
-  border: none;
-  color: var(--accent);
-  font-size: 0.8rem;
+  --btn-ink: var(--accent);
+  --btn-tint: var(--accent-tint);
+
   font-family: var(--font);
+  font-size: 0.76rem;
+  font-weight: 500;
+  line-height: 1.5;
+  padding: 3px 11px;
+  border-radius: 999px;
+  color: var(--btn-ink);
+  background: var(--btn-tint);
+  border: 1px solid color-mix(in oklab, var(--btn-ink) 28%, transparent);
   cursor: pointer;
-  padding: 0;
   align-self: center;
+  white-space: nowrap;
+  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.jump-today:focus-visible {
+  outline: 2px solid var(--btn-ink);
+  outline-offset: 2px;
 }
 
 .save-icon {
@@ -581,18 +602,31 @@ html, body {
 }
 
 @supports (color: oklch(from red l c h)) {
-  .app[data-mood] .tag,
-  .app[data-mood] .ghost-tag-chip {
-    color: oklch(
+  .app[data-mood] {
+    /* The day's colour twice over: once as ink — hue kept, lightness and chroma
+       clamped into the band text can live in — and once as the wash that goes
+       behind it. Everything that belongs to the day reads from these two. */
+    --day-ink: oklch(
       from var(--day-mood)
       clamp(var(--ink-l-min), l, var(--ink-l-max))
       clamp(var(--ink-c-min), c, var(--ink-c-max))
       h
     );
+    --day-tint: color-mix(in oklab, var(--day-mood) 14%, transparent);
+  }
+
+  .app[data-mood] .tag,
+  .app[data-mood] .ghost-tag-chip {
+    color: var(--day-ink);
   }
 
   .app[data-mood] .ghost-tag-chip {
-    background: color-mix(in oklab, var(--day-mood) 14%, transparent);
+    background: var(--day-tint);
+  }
+
+  .app[data-mood] .jump-today {
+    --btn-ink: var(--day-ink);
+    --btn-tint: var(--day-tint);
   }
 }
 
