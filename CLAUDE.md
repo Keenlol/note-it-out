@@ -88,7 +88,7 @@ token is defined on bare `:root` (light) and overridden under
 | `--text-2`      | `rgba(…, 0.55 / 0.50)`  | —                       | Secondary / supporting |
 | `--text-dim`    | `rgba(…, 0.42 / 0.38)`  | —                       | Metadata, labels |
 | `--text-muted`  | `rgba(…, 0.28 / 0.25)`  | —                       | Very subtle text, idle icons |
-| `--accent`      | `#b8701a`               | `#e0a052`               | `#tags` only |
+| `--accent`      | `#b8701a`               | `#e0a052`               | `#tags` on a day with no mood |
 | `--accent-tint` | `rgba(accent, 0.10/.12)`| —                       | Tag chip backgrounds |
 | `--delete`      | `#b0453c`               | `#cf6157`               | Destructive actions |
 
@@ -98,23 +98,58 @@ so the whole palette stays one temperature family.
 
 ### Mood ramp
 
-`--mood-0` … `--mood-4`, indexed to `MOOD_LEVELS` in `utils/mood.ts`.
+`--mood-0` … `--mood-6`, indexed to `MOOD_LEVELS` in `utils/mood.ts`.
 
 | Step | Label   | Light     | Dark      |
 |------|---------|-----------|-----------|
-| 0    | rough   | `#6d8aa4` | `#4d6b85` |
-| 1    | low     | `#9db1bf` | `#6d8497` |
-| 2    | okay    | `#cdc3b3` | `#7d7365` |
-| 3    | good    | `#e6ab5c` | `#c98f38` |
-| 4    | great   | `#ec9418` | `#e8a02a` |
+| 0    | bleak   | `#5a7ea3` | `#32557b` |
+| 1    | rough   | `#7f99b3` | `#4f6881` |
+| 2    | low     | `#9fb0c0` | `#687886` |
+| 3    | okay    | `#c5bcb1` | `#867f76` |
+| 4    | good    | `#cbb194` | `#9e876d` |
+| 5    | great   | `#d69c65` | `#c6905d` |
+| 6    | bright  | `#e27e19` | `#f89845` |
 
 Cool slate → warm neutral → amber. **Never red↔green**: it reimports the
 pass/fail framing the app is built to avoid, and it's the worst possible choice
 for colour-blind readers. Temperature reads as weather, not as a grade.
 
+**These are derived, not chosen.** Three OKLCH anchors — a near-grey centre, a
+warm end, a cool end — and every step between them interpolated through
+`e(d) = (d/3)^1.35`, where `d` is the distance from centre. The exponent eases
+each arm *out* of the neutral, so `low` and `good` sit close to `okay` and the
+outer steps carry the range: a nudge off neutral should look like a nudge. It is
+the one number to touch if the middle feels too quiet or too loud. Hue rotates
+as an arm intensifies (76° tan → 58° orange, 242° → 250° slate) — that torsion
+is what stops the ramp reading as a tint slider. The arms are balanced by eye
+against each other's *weight*, not by matching chroma: blue needs less chroma
+than amber to read as itself.
+
+The two themes are structurally different, and should stay that way:
+
+- **Light is a hill** — the neutral is the lightest step, nearest the paper, and
+  both arms darken outward. The flat day is the one that disappears.
+- **Dark is a climb** — lightness rises the whole way (0.440 → 0.765), because on
+  this background a dark blue reads as *dim* rather than as cool.
+
 Use `moodColor(i)` for a step and `moodColorMix(f)` for a fractional value (an
 average, or a thumb mid-drag) — the latter blends neighbouring steps via
 `color-mix`.
+
+### Tags take the day's colour
+
+A `#tag` in the note is painted with the mood of the day it was written on, not
+with a fixed highlight: the day has one temperature and everything written that
+day belongs to it. `App.tsx` publishes `--day-mood` and a `data-mood` attribute
+on `.app`; `.tag` reads it through relative colour syntax, keeping the mood's
+**hue** and clamping only lightness and chroma into the band ink can live in
+(`--ink-l-min/max`, `--ink-c-min/max`, per theme). The chroma *floor* matters —
+without it a flat day's tags would be indistinguishable from prose.
+
+No mood set → no `data-mood` → plain `--accent`, as before. The whole rule is
+inside `@supports (color: oklch(from red l c h))`, so anything without relative
+colour keeps the accent. Tags in the **tag sheet** stay `--accent`: that list
+spans days, and colouring it by any one day's mood would be a lie.
 
 ### The right-hand axis
 

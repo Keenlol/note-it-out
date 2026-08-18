@@ -25,8 +25,16 @@
   --text-dim:   rgba(44, 38, 32, 0.42);
   --text-muted: rgba(44, 38, 32, 0.28);
 
-  --accent:      #b8701a;                    /* tags — the warm end of the ramp */
+  --accent:      #b8701a;      /* tags on a day with no mood set */
   --accent-tint: rgba(184, 112, 26, 0.10);
+
+  /* The band a mood colour has to be squeezed into before it can be read as
+     text — see .tag. Paper can only carry ink down to about L 0.58; below that
+     the ramp is already dark enough to leave alone. */
+  --ink-l-min: 0.40;
+  --ink-l-max: 0.58;
+  --ink-c-min: 0.055;   /* a flat day still has to look like a tag, not prose */
+  --ink-c-max: 0.120;   /* past this the hue leaves sRGB at these lightnesses */
   --delete:      #b0453c;
 
   --cell-noted: #ece3d4;   /* a note, but no mood: something happened here */
@@ -34,16 +42,34 @@
      21×7 a normal hairline turns the whole grid into a wireframe. */
   --cell-line:  #f0e9dd;
 
-  /* Mood ramp: cool → warm. Index matches MOOD_LEVELS in utils/mood.ts.
-     Light is a valley — both ends darken, the neutral middle is the lightest
-     step — so intensity reads the same going either way from centre. */
-  --mood-0: #4e6b86;
-  --mood-1: #6d8aa4;
-  --mood-2: #9db1bf;
-  --mood-3: #cdc3b3;
-  --mood-4: #e6ab5c;
-  --mood-5: #ec9418;
-  --mood-6: #dd7a0e;
+  /* Mood ramp: cool → warm, index matching MOOD_LEVELS in utils/mood.ts. Not
+     picked by eye — built in OKLCH from three anchors (neutral centre, warm
+     end, cool end) with every step in between interpolated, so the ramp is
+     perceptually even rather than evenly spaced in hex:
+
+       e(d) = (d/3)^1.35   for d = distance from the neutral centre
+
+     The exponent is the whole feel of the scale. It eases the arms *out* of
+     the centre, so `low` and `good` sit close to `okay` and the outer steps
+     carry the range — a nudge off neutral should look like a nudge. Raise it
+     for a quieter middle, lower it toward 1.0 for the old even spacing; it is
+     the one number to touch.
+
+     Chroma runs 0.018 → 0.158 (warm) / 0.070 (cool): blue needs less chroma
+     than amber to read as itself, and paper cannot take a vivid blue without
+     it turning into a highlight. Hue rotates as each arm intensifies —
+     76° tan → 58° orange, 242° → 250° slate — which is what makes the ramp
+     look like a ramp and not a tint slider.
+
+     Light is a hill: the neutral is the lightest step, nearest the paper, and
+     both arms darken outward. A flat day should be the one that disappears. */
+  --mood-0: #5a7ea3;
+  --mood-1: #7f99b3;
+  --mood-2: #9fb0c0;
+  --mood-3: #c5bcb1;
+  --mood-4: #cbb194;
+  --mood-5: #d69c65;
+  --mood-6: #e27e19;
 
   --shadow-thumb: 0 1px 5px rgba(44, 38, 32, 0.22);
 
@@ -107,20 +133,30 @@
 
   --accent:      #e0a052;
   --accent-tint: rgba(224, 160, 82, 0.12);
+
+  /* Ink runs the other way here: the warm end is already bright enough to read
+     and keeps its own colour, only the cool end has to be lifted. */
+  --ink-l-min: 0.66;
+  --ink-l-max: 0.92;
+  --ink-c-min: 0.055;
+  --ink-c-max: 0.140;
   --delete:      #cf6157;
 
   --cell-noted: #2a251d;
   --cell-line:  #241f18;
 
-  /* Dark is a climb, not a valley: on this background the cool end has to give
-     up brightness to read as cool at all, so the ramp brightens all the way. */
-  --mood-0: #3b5a72;
-  --mood-1: #4d6b85;
-  --mood-2: #6d8497;
-  --mood-3: #7d7365;
-  --mood-4: #c98f38;
-  --mood-5: #e8a02a;
-  --mood-6: #f2ac35;
+  /* Same three anchors, same easing — but dark is a climb, not a hill:
+     lightness rises the whole way (0.440 → 0.765), because on this background
+     a dark blue reads as *dim* rather than as cool. Light hides the neutral
+     day, dark lifts the bright one; the two modes are the same idea told from
+     opposite ends, which is why they aren't one palette with a filter. */
+  --mood-0: #32557b;
+  --mood-1: #4f6881;
+  --mood-2: #687886;
+  --mood-3: #867f76;
+  --mood-4: #9e876d;
+  --mood-5: #c6905d;
+  --mood-6: #f89845;
 
   --shadow-thumb: 0 1px 6px rgba(0, 0, 0, 0.5);
 }
@@ -528,8 +564,36 @@ html, body {
 }
 
 /* A #tag, anywhere in a line */
+/* Tags take the day's mood. The whole point of the app is that a day has one
+   temperature; the tags written that day belong to it, so they are written in
+   its colour rather than in a fixed highlight.
+
+   The mood colour can't be used raw — it is tuned for a 12px cell, not for
+   18px serif on paper — so it is squeezed into the band ink can live in:
+   the *hue* is the mood's, untouched, and only lightness and chroma are
+   clamped. Cool days get slate tags, warm days amber ones, a flat day a quiet
+   tan, and every one of them clears the contrast the old fixed accent had.
+
+   --day-mood is set in App.tsx from the viewed day, so a tag re-colours live
+   while you drag the rail. No mood set → no [data-mood] → plain --accent. */
 .tag {
   color: var(--accent);
+}
+
+@supports (color: oklch(from red l c h)) {
+  .app[data-mood] .tag,
+  .app[data-mood] .ghost-tag-chip {
+    color: oklch(
+      from var(--day-mood)
+      clamp(var(--ink-l-min), l, var(--ink-l-max))
+      clamp(var(--ink-c-min), c, var(--ink-c-max))
+      h
+    );
+  }
+
+  .app[data-mood] .ghost-tag-chip {
+    background: color-mix(in oklab, var(--day-mood) 14%, transparent);
+  }
 }
 
 .ghost {
@@ -844,8 +908,8 @@ html, body {
   gap: 6px;
 }
 
-.tag-delta.up    { color: var(--mood-4); }
-.tag-delta.down  { color: var(--mood-0); }
+.tag-delta.up    { color: var(--mood-5); }
+.tag-delta.down  { color: var(--mood-1); }
 .tag-delta.muted { color: var(--text-muted); font-weight: 500; }
 
 .tag-delta-label {

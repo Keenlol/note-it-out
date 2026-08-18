@@ -9,6 +9,7 @@ import {
   getAllDays, loadDay, offsetDate, saveDayMood, saveDayText, todayKey,
 } from './utils/storage'
 import { activeTagFragment, lineIndexAt } from './utils/parser'
+import { moodColor } from './utils/mood'
 import { tagFrequency } from './utils/tags'
 import { formatDisplayDate } from './utils/format'
 import { weekOffsetForDate } from './utils/window'
@@ -351,7 +352,14 @@ export function App() {
   const isPast = viewDate !== null
 
   return (
-    <div className="app">
+    <div
+      className="app"
+      // The day's colour, for anything written that day — the tags in the note
+      // read it (see .tag in index.css). Absent when no mood is set, which is
+      // what makes tags fall back to --accent.
+      data-mood={mood ?? undefined}
+      style={mood !== null ? ({ '--day-mood': moodColor(mood) } as React.CSSProperties) : undefined}
+    >
       <div ref={heatmapRef}>
         <Heatmap
           onDayClick={goToDate}
