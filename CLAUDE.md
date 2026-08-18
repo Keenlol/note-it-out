@@ -219,20 +219,25 @@ scheme (dark 19:00–06:00) — the point is that the app knows what time it is.
 `<meta name="theme-color">` with a single unconditional one; `index.html` ships
 two media-scoped ones for the pre-JS first paint.
 
-### Bottom sheet
+### Panels
 
 ```css
-border-radius: 16px 16px 0 0;
-z-index: 20;                                   /* scrim 19, dock 30 */
+top: var(--content-top);   /* under the graph, down to the bottom of the screen */
+transform: translateX(100%) → translateX(0);
+z-index: 40;                                   /* scrim 39, dock 30 */
 ```
-The sheet paints over the mood rail (the rail is `position: fixed` with an auto
-z-index, earlier in the DOM) but under the dock, so the dock keeps working as a
-tab bar while a sheet is open — exactly what the bottom bar used to do.
-Sheets slide up from the bottom and are mutually exclusive. Default height is
-measured from `heatmapRef.bottom` to `visualViewport.height`, so an open sheet
-never covers the grid; dragging the handle opts out of auto-sizing for good, and
-a tap on the handle closes. The scrim is a transparent tap-catcher — it must
-never dim the heatmap.
+A panel turns the page **like a book: in from the right**, off the side the
+button that opened it lives on — not up from the bottom, which pointed away from
+the controls. It is full-bleed and paints over the mood rail *and the dock*, so
+the buttons are gone while it's open; a panel therefore carries its own way out,
+`SheetClose`, an X standing on `--rail-cx` — the same line the dock buttons it
+covered stand on. Panels are mutually exclusive.
+
+**Panels are not resizable and have no stored height.** They fill from
+`--content-top` (the foot of the graph, so the grid always stays visible) to the
+bottom of the screen. There was a drag handle and a persisted height; both are
+gone — one size, nothing to tune. The scrim is a transparent tap-catcher over
+the graph — it must never dim the heatmap.
 
 ### Settings patterns
 
@@ -272,6 +277,7 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
 - `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.
+- `components/SheetClose.tsx` — the X every panel opens with, on the rail axis.
 - `components/SettingsSheet.tsx` — theme, data stats, export/import/clear.
 
 **Key patterns:**

@@ -12,14 +12,12 @@ import { activeTagFragment, lineIndexAt } from './utils/parser'
 import { tagFrequency } from './utils/tags'
 import { formatDisplayDate } from './utils/format'
 import { weekOffsetForDate } from './utils/window'
-import { getSavedSheetHeight, getSavedTheme, saveSheetHeight, saveTheme } from './utils/settings'
+import { getSavedTheme, saveTheme } from './utils/settings'
 import { applyTheme, msUntilNextFlip, resolveTheme, type ThemePref } from './utils/theme'
 import { tap } from './utils/tap'
 
 const SAVE_DELAY = 400
 const SAVED_FLASH_MS = 1200
-const SHEET_TOP_GAP = 60
-const MIN_SHEET_HEIGHT = 220
 /** How many tags the ghost block lists before giving up on being helpful. */
 const MAX_TAG_OPTIONS = 8
 
@@ -41,7 +39,6 @@ export function App() {
 
   const [tagSheetOpen, setTagSheetOpen] = useState(false)
   const [settingsOpen, setSettingsOpen] = useState(false)
-  const [sheetHeight, setSheetHeight] = useState<number | undefined>(() => getSavedSheetHeight())
 
   const [themePref, setThemePref] = useState<ThemePref>(() => getSavedTheme())
 
@@ -205,34 +202,16 @@ export function App() {
     }
   }, [])
 
-  // ── Sheets ──────────────────────────────────────────────────────────────
-  const anySheetOpen = tagSheetOpen || settingsOpen
-  const manualHeight = useRef(getSavedSheetHeight() !== undefined)
-  const latestHeight = useRef<number | undefined>(getSavedSheetHeight())
-
-  const clampSheetHeight = (px: number): number => {
-    const vh = window.visualViewport?.height ?? window.innerHeight
-    return Math.round(Math.max(MIN_SHEET_HEIGHT, Math.min(px, vh - SHEET_TOP_GAP)))
-  }
-
-  // Default the sheet to exactly the space under the heatmap, so opening one
-  // never covers the grid. A manual drag opts out of this for good.
+  // Where the graph ends, in document coords so scrolling can't skew it. The
+  // mood rail sizes itself off this and a panel opens right under it: both
+  // depend on where the content begins, which no CSS length can express.
   useEffect(() => {
     const el = heatmapRef.current
     if (!el) return
     const update = () => {
-      const vh = window.visualViewport?.height ?? window.innerHeight
-      // Where the two columns start, in document coords so scrolling can't
-      // skew it. The mood rail sizes itself off this: its length depends on
-      // where it begins, which no CSS length can express.
       document.documentElement.style.setProperty(
         '--content-top', `${el.getBoundingClientRect().bottom + window.scrollY}px`,
       )
-      if (manualHeight.current) {
-        setSheetHeight(h => (h === undefined ? h : clampSheetHeight(h)))
-        return
-      }
-      setSheetHeight(vh - el.getBoundingClientRect().bottom)
     }
     update()
     const ro = new ResizeObserver(update)
@@ -241,16 +220,8 @@ export function App() {
     return () => { ro.disconnect(); window.removeEventListener('resize', update) }
   }, [])
 
-  const handleSheetResize = (px: number) => {
-    manualHeight.current = true
-    const clamped = clampSheetHeight(px)
-    latestHeight.current = clamped
-    setSheetHeight(clamped)
-  }
-
-  const handleSheetResizeEnd = () => {
-    if (latestHeight.current !== undefined) saveSheetHeight(latestHeight.current)
-  }
+  // ── Panels ──────────────────────────────────────────────────────────────
+  const anySheetOpen = tagSheetOpen || settingsOpen
 
   const closeSheets = () => { setTagSheetOpen(false); setSettingsOpen(false) }
 
@@ -423,8 +394,8 @@ export function App() {
         <MoodSlider value={mood} onChange={handleMoodChange} fade={noteOpacity} />
       </div>
 
-      {/* The rail's foot: clear-mood, then the two sheets. Fixed, so it stays
-          reachable and stays above an open sheet the way a tab bar does. */}
+      {/* The rail's foot: clear-mood, then the two panels. An open panel covers
+          this outright — it carries its own close button instead. */}
       <div className="dock">
         <button
           className={`dock-btn dock-clear${mood !== null && !anySheetOpen ? ' visible' : ''}`}
@@ -456,9 +427,6 @@ export function App() {
       <TagSheet
         open={tagSheetOpen}
         onClose={() => setTagSheetOpen(false)}
-        onResize={handleSheetResize}
-        onResizeEnd={handleSheetResizeEnd}
-        height={sheetHeight}
         dataVersion={dataVersion}
         onDayClick={goToDate}
       />
@@ -466,9 +434,6 @@ export function App() {
       <SettingsSheet
         open={settingsOpen}
         onClose={() => setSettingsOpen(false)}
-        onResize={handleSheetResize}
-        onResizeEnd={handleSheetResizeEnd}
-        height={sheetHeight}
         dataVersion={dataVersion}
         theme={themePref}
         onThemeChange={handleThemeChange}

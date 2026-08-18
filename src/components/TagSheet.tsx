@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import { Search, X } from 'lucide-react'
-import { SheetHandle } from './SheetHandle'
+import { SheetClose } from './SheetClose'
 import { SegmentedControl, type SegOption } from './SegmentedControl'
 import { getAllDays } from '../utils/storage'
 import { buildTagCatalog, getTagDays, MIN_MOOD_DAYS, type TagStat } from '../utils/tags'
@@ -19,9 +19,6 @@ const SORTS: SegOption<Sort>[] = [
 interface Props {
   open: boolean
   onClose: () => void
-  onResize: (height: number) => void
-  onResizeEnd: () => void
-  height?: number
   dataVersion: number
   onDayClick: (date: string) => void
 }
@@ -49,7 +46,7 @@ function sortTags(tags: TagStat[], sort: Sort): TagStat[] {
 }
 
 export function TagSheet({
-  open, onClose, onResize, onResizeEnd, height, dataVersion, onDayClick,
+  open, onClose, dataVersion, onDayClick,
 }: Props) {
   const [sort, setSort] = useState<Sort>('most')
   const [query, setQuery] = useState('')
@@ -70,8 +67,8 @@ export function TagSheet({
   )
 
   return (
-    <div className={`sheet${open ? ' open' : ''}`} style={height ? { height } : undefined}>
-      <SheetHandle onClose={onClose} onResize={onResize} onResizeEnd={onResizeEnd} />
+    <div className={`sheet${open ? ' open' : ''}`}>
+      <SheetClose onClose={onClose} />
 
       <div className="sheet-header">
         <div className="sheet-title-row">
