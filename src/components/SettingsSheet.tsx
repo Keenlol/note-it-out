@@ -9,12 +9,19 @@ import {
   exportFilename, formatBytes, getStats, parseImport, type ExportFile,
 } from '../utils/data'
 import { tap } from '../utils/tap'
+import { CAN_VIBRATE } from '../utils/haptics'
 
 const THEMES: SegOption<ThemePref>[] = [
   { value: 'light', label: 'Light' },
   { value: 'dark', label: 'Dark' },
   { value: 'auto', label: 'Auto' },
 ]
+
+const SWITCH: SegOption<'on' | 'off'>[] = [
+  { value: 'on', label: 'On' },
+  { value: 'off', label: 'Off' },
+]
+
 
 type ConfirmState =
   | { kind: 'none' }
@@ -28,6 +35,8 @@ interface Props {
   dataVersion: number
   theme: ThemePref
   onThemeChange: (pref: ThemePref) => void
+  haptics: boolean
+  onHapticsChange: (on: boolean) => void
   onDataChanged: () => void
 }
 
@@ -38,7 +47,7 @@ function hour12(h: number): string {
 }
 
 export function SettingsSheet({
-  open, onClose, dataVersion, theme, onThemeChange, onDataChanged,
+  open, onClose, dataVersion, theme, onThemeChange, haptics, onHapticsChange, onDataChanged,
 }: Props) {
   const [confirm, setConfirm] = useState<ConfirmState>({ kind: 'none' })
   const fileRef = useRef<HTMLInputElement>(null)
@@ -88,6 +97,21 @@ export function SettingsSheet({
           </p>
           <SegmentedControl options={THEMES} value={theme} onChange={onThemeChange} />
         </div>
+
+        {CAN_VIBRATE && (
+          <div className="settings-section">
+            <span className="settings-section-label">Haptics</span>
+            <p className="settings-section-hint">
+              A small tick each time the mood slider crosses into the next colour.
+              Needs a phone with a vibration motor.
+            </p>
+            <SegmentedControl
+              options={SWITCH}
+              value={haptics ? 'on' : 'off'}
+              onChange={v => onHapticsChange(v === 'on')}
+            />
+          </div>
+        )}
 
         <div className="settings-section">
           <span className="settings-section-label">Your data</span>

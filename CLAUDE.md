@@ -169,7 +169,11 @@ The mood slider is the reference for how interaction should feel, and it splits
 one gesture into two rates:
 
 - the **value** quantises the instant you cross a band — label swap plus a
-  `navigator.vibrate(8)` detent;
+  `detent()` (`utils/haptics.ts`, a 12 ms pulse; under ~10 ms many Android
+  motors never spin up far enough to be felt). It is the app's **only** haptic
+  and should stay that way — a phone that buzzes at everything gets muted.
+  Settings can turn it off, and hides the toggle where `navigator.vibrate` does
+  not exist at all (iOS);
 - the **thumb** tracks the finger 1:1 with `transition: none`, and only springs
   onto the grid when you let go.
 
@@ -262,6 +266,7 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `utils/tags.ts` — `buildTagCatalog` aggregates across days. Tags are counted
   **per day, not per occurrence**.
 - `utils/mood.ts` — the scale, labels and colour helpers.
+- `utils/haptics.ts` — the detent pulse, the on/off call, and `CAN_VIBRATE`.
 - `utils/theme.ts`, `utils/settings.ts`, `utils/data.ts` (export/import/stats),
   `utils/window.ts` (21-week heatmap geometry), `utils/format.ts`, `utils/tap.ts`.
 

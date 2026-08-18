@@ -12,9 +12,10 @@ import { activeTagFragment, lineIndexAt } from './utils/parser'
 import { tagFrequency } from './utils/tags'
 import { formatDisplayDate } from './utils/format'
 import { weekOffsetForDate } from './utils/window'
-import { getSavedTheme, saveTheme } from './utils/settings'
+import { getSavedHaptics, getSavedTheme, saveHaptics, saveTheme } from './utils/settings'
 import { applyTheme, msUntilNextFlip, resolveTheme, type ThemePref } from './utils/theme'
 import { tap } from './utils/tap'
+import { detent } from './utils/haptics'
 
 const SAVE_DELAY = 400
 const SAVED_FLASH_MS = 1200
@@ -41,6 +42,7 @@ export function App() {
   const [settingsOpen, setSettingsOpen] = useState(false)
 
   const [themePref, setThemePref] = useState<ThemePref>(() => getSavedTheme())
+  const [haptics, setHaptics] = useState<boolean>(() => getSavedHaptics())
 
   const textareaRef = useRef<HTMLTextAreaElement>(null)
   const heatmapRef = useRef<HTMLDivElement>(null)
@@ -136,6 +138,13 @@ export function App() {
   const handleThemeChange = (pref: ThemePref) => {
     setThemePref(pref)
     saveTheme(pref)
+  }
+
+  const handleHapticsChange = (on: boolean) => {
+    setHaptics(on)
+    saveHaptics(on)
+    // Confirm the choice in the language of the choice.
+    detent(on)
   }
 
   // ── Tag autocomplete ────────────────────────────────────────────────────
@@ -391,7 +400,12 @@ export function App() {
         </div>
 
         {/* Note and mood both belong to the day, so both fade on a swipe. */}
-        <MoodSlider value={mood} onChange={handleMoodChange} fade={noteOpacity} />
+        <MoodSlider
+          value={mood}
+          onChange={handleMoodChange}
+          fade={noteOpacity}
+          haptics={haptics}
+        />
       </div>
 
       {/* The rail's foot: clear-mood, then the two panels. An open panel covers
@@ -437,6 +451,8 @@ export function App() {
         dataVersion={dataVersion}
         theme={themePref}
         onThemeChange={handleThemeChange}
+        haptics={haptics}
+        onHapticsChange={handleHapticsChange}
         onDataChanged={() => {
           // Imports and wipes replace what's under us — reload the viewed day.
           loadedDate.current = null

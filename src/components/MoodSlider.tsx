@@ -2,12 +2,16 @@ import { useEffect, useRef, useState } from 'react'
 import {
   MOOD_COUNT, MOOD_LEVELS, MOOD_MAX, clampMood, moodColor, moodColorMix, moodLabel,
 } from '../utils/mood'
+import { detent } from '../utils/haptics'
 
 interface Props {
   value: number | null
   onChange: (value: number | null) => void
   /** Opacity for the day-change fade. The mood belongs to the day it labels. */
   fade?: number
+  /** Haptic detents at each band edge. Off is a settings choice, not a fallback
+   *  — hardware that can't buzz simply no-ops. */
+  haptics?: boolean
 }
 
 // How long the label lingers after you let go.
@@ -34,7 +38,7 @@ const THUMB_STOP = 13
  * The label is deliberately transient — the colour is the permanent readout, and
  * a permanently visible grade would make the day feel scored.
  */
-export function MoodSlider({ value, onChange, fade = 1 }: Props) {
+export function MoodSlider({ value, onChange, fade = 1, haptics = true }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const lastIndex = useRef<number | null>(null)
@@ -59,8 +63,9 @@ export function MoodSlider({ value, onChange, fade = 1 }: Props) {
   function commit(index: number) {
     if (lastIndex.current !== index) {
       lastIndex.current = index
-      // Discrete steps deserve a detent. No-op where unsupported (iOS).
-      navigator.vibrate?.(8)
+      // A detent every time the thumb crosses into the next colour — the value
+      // quantises there, so that is where the hand should be told.
+      detent(haptics)
     }
     onChange(index)
   }
