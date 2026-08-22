@@ -338,7 +338,14 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
   `--dock-h` derives from that count, and it feeds `--rail-h`, so adding a button
   shortens the rail rather than colliding with it.
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
-- `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
+- `components/Heatmap.tsx` — 21-week grid, cell colour = mood. Drawn as one
+  ruled sheet, not loose chips: `.heatmap-grid` is the line colour and the 1px
+  padding and gaps are the rules, so every cell must paint an **opaque**
+  background (a transparent one floods with the rule colour) — including future
+  days, which is why they no longer read as distinct from empty ones. The block
+  is rounded by the four corner cells rounding their own outer corner, never by
+  clipping: `overflow: hidden` would cut the selection ring off the edge cells,
+  and today is always in the last column.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.
   Each tag is **one row**: mood dot, name in that colour, day count, average
   score. There is no description box — a stat that needs a sentence belongs in
