@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, Hash, Settings, X } from 'lucide-react'
+import { Check, ChevronLast, Hash, Settings, X } from 'lucide-react'
 import { Heatmap } from './components/Heatmap'
 import { Editor, type Suggestion } from './components/Editor'
 import { MoodSlider } from './components/MoodSlider'
@@ -392,11 +392,6 @@ export function App() {
             <h1 className={`title${isPast ? ' past' : ''}`} style={titleStyle}>
               {formatDisplayDate(currentDate)}
             </h1>
-            {isPast && (
-              <button className="jump-today" onPointerDown={tap} onClick={() => setViewDate(null)}>
-                Today
-              </button>
-            )}
             <span className={`save-icon${savedFlash ? ' visible' : ''}`} aria-hidden="true">
               <Check size={14} strokeWidth={2.4} />
             </span>
@@ -424,17 +419,28 @@ export function App() {
         />
       </div>
 
-      {/* The rail's foot: clear-mood, then the two panels. An open panel covers
-          this outright — it carries its own close button instead. */}
+      {/* The rail's foot: clear-mood, back-to-today, then the two panels. The
+          first two hold their space when they don't apply, so the stack never
+          shifts. An open panel covers this outright — it carries its own close
+          button instead. */}
       <div className="dock">
         <button
-          className={`dock-btn dock-clear${mood !== null && !anySheetOpen ? ' visible' : ''}`}
+          className={`dock-btn dock-optional${mood !== null && !anySheetOpen ? ' visible' : ''}`}
           onPointerDown={tap}
           onClick={() => handleMoodChange(null)}
           aria-label="Clear mood"
           tabIndex={mood !== null && !anySheetOpen ? 0 : -1}
         >
           <X size={18} strokeWidth={2.2} />
+        </button>
+        <button
+          className={`dock-btn dock-optional${isPast && !anySheetOpen ? ' visible' : ''}`}
+          onPointerDown={tap}
+          onClick={() => setViewDate(null)}
+          aria-label="Go to today"
+          tabIndex={isPast && !anySheetOpen ? 0 : -1}
+        >
+          <ChevronLast size={20} strokeWidth={2} />
         </button>
         <button
           className={`dock-btn${tagSheetOpen ? ' active' : ''}`}

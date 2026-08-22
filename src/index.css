@@ -95,7 +95,7 @@
   /* The dock at the foot of the rail. Derive --dock-h, never restate it. */
   --dock-btn: 40px;
   --dock-gap: 6px;
-  --dock-h: calc(3 * var(--dock-btn) + 2 * var(--dock-gap));
+  --dock-h: calc(4 * var(--dock-btn) + 3 * var(--dock-gap));
 
   /* Where the rail starts and how long it runs. --content-top is set from
      App.tsx (where the graph ends); --rail-top is the clearance it keeps from
@@ -338,30 +338,6 @@ html, body {
    It carries the viewed day's mood for the same reason the tags do — it sits in
    that day's note — and takes its two colours from the same tokens, so there is
    one definition of "the day's colour as ink" in the file. */
-.jump-today {
-  --btn-ink: var(--accent);
-  --btn-tint: var(--accent-tint);
-
-  font-family: var(--font);
-  font-size: 0.76rem;
-  font-weight: 500;
-  line-height: 1.5;
-  padding: 3px 11px;
-  border-radius: 999px;
-  color: var(--btn-ink);
-  background: var(--btn-tint);
-  border: 1px solid color-mix(in oklab, var(--btn-ink) 28%, transparent);
-  cursor: pointer;
-  align-self: center;
-  white-space: nowrap;
-  transition: color 0.2s ease, background 0.2s ease, border-color 0.2s ease;
-}
-
-.jump-today:focus-visible {
-  outline: 2px solid var(--btn-ink);
-  outline-offset: 2px;
-}
-
 .save-icon {
   display: inline-flex;
   align-items: center;
@@ -623,11 +599,6 @@ html, body {
   .app[data-mood] .ghost-tag-chip {
     background: var(--day-tint);
   }
-
-  .app[data-mood] .jump-today {
-    --btn-ink: var(--day-ink);
-    --btn-tint: var(--day-tint);
-  }
 }
 
 .ghost {
@@ -667,9 +638,9 @@ html, body {
 }
 
 /* ── Dock ─────────────────────────────────────────────────────────────────
-   The foot of the rail: clear-mood, then the two sheets, stacked on the same
-   --rail-cx line so the right edge of the app is one column from the heatmap
-   down. Fixed rather than in flow, because these have to stay reachable while
+   The foot of the rail: clear-mood, back-to-today, then the two sheets, stacked
+   on the same --rail-cx line so the right edge of the app is one column from
+   the heatmap down. Fixed rather than in flow, because these stay reachable while
    a long note scrolls and stay above an open sheet, the way a tab bar does.
    .mood-column reserves --dock-h so the rail ends exactly where this starts. */
 
@@ -712,15 +683,17 @@ html, body {
   color: var(--text);
 }
 
-/* Clearing is only offered when there's a mood to clear — and not over a sheet,
-   where the rail it belongs to isn't visible. Space is held either way, so the
-   two below it never move. */
-.dock-clear {
+/* Two of the four only apply sometimes: clearing, when there's a mood to clear,
+   and back-to-today, when you're not on today. Neither is offered over a sheet,
+   where the rail they belong to isn't visible. Space is held either way — the
+   stack is a fixed column of four, so nothing below ever moves under your
+   thumb. */
+.dock-optional {
   opacity: 0;
   pointer-events: none;
 }
 
-.dock-clear.visible {
+.dock-optional.visible {
   opacity: 1;
   pointer-events: auto;
 }

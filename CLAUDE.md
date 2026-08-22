@@ -149,10 +149,10 @@ colour at 14%, for anything that needs a wash behind the ink). The chroma
 *floor* matters — without it a flat day's tags would be indistinguishable from
 prose.
 
-Three things wear it: `.tag`, the autocomplete chips, and the **Today** pill in
-the title row, which sits in that day's note and so belongs to it too. Anything
-else that lives inside a single day should read `--day-ink`/`--day-tint` rather
-than re-deriving the expression.
+Two things wear it: `.tag` and the autocomplete chips. Anything else that lives
+inside a single day should read `--day-ink`/`--day-tint` rather than re-deriving
+the expression. Note the dock is **not** one of them — it is app chrome standing
+on the rail axis, not something written on the day, so its buttons stay muted.
 
 No mood set → no `data-mood` → plain `--accent`, as before. The whole rule is
 inside `@supports (color: oklch(from red l c h))`, so anything without relative
@@ -324,8 +324,12 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
   the right edge, warm end at the top; label on drag only. A step rests at the
   **middle of its band**, not at the end of the track, and a touch anywhere in a
   band selects it. The rail renders only the track; clearing the mood lives in
-  the dock in `App.tsx` with the two sheet toggles, since all three are one
-  stack on the same axis.
+  the dock in `App.tsx` with back-to-today and the two sheet toggles, since all
+  four are one stack on the same axis. The dock is a **fixed column of four** —
+  clear-mood and back-to-today hold their space (`.dock-optional`, opacity only)
+  when they don't apply, so the buttons below them never shift under a thumb.
+  `--dock-h` derives from that count, and it feeds `--rail-h`, so adding a button
+  shortens the rail rather than colliding with it.
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
 - `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.
