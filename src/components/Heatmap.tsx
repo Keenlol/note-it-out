@@ -119,8 +119,10 @@ export function Heatmap({
               const cell = filterDates && live.date !== null && !filterDates.has(live.date)
                 ? { ...live, mood: null, hasText: false }
                 : live
-              const selected = (cell.date !== null && cell.date === selectedDate)
-                || (cell.isToday && selectedDate === null)
+              // Only an explicit selection — a past day. Today is never it:
+              // selectedDate is null whenever you're on today, and today's own
+              // shape already says where you are.
+              const selected = cell.date !== null && cell.date === selectedDate
               return (
                 <div
                   key={d}

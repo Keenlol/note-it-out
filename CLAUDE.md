@@ -378,8 +378,12 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - Tag autocomplete mirrors note-it-down's preset ghost: bare `#` or an ambiguous
   prefix → list chips as a hint and stay out of the way (Enter still inserts a
   newline); a unique prefix → inline ghost that Tab/Enter accepts.
-- Selection rings on heatmap cells use `outline` + `outline-offset`, never an
-  inset `box-shadow` — at cell size an inset ring eats the mood colour.
+- **Today is a shape, not a ring**: its cell is `border-radius: 999px`, a hole
+  punched in the ruled sheet. On the default view that is the only marking —
+  nothing is `.selected` when `viewDate` is null, because today's shape already
+  says where you are. A ring is only drawn on the *past* day you're browsing.
+- The one selection ring left uses `outline`, never an inset `box-shadow` — at
+  cell size an inset ring eats the mood colour — and no offset, now cells touch.
 
 ## PWA
 

@@ -291,16 +291,18 @@ html, body {
   transition: background 0.18s ease, box-shadow 0.15s ease;
 }
 
-.heatmap-col:first-child .heatmap-cell:first-child {
+/* :not(.today) because today is round on every corner and is always in the last
+   column — the two rules would otherwise fight over the same corner. */
+.heatmap-col:first-child .heatmap-cell:first-child:not(.today) {
   border-top-left-radius: calc(var(--grid-r) - 1px);
 }
-.heatmap-col:first-child .heatmap-cell:last-child {
+.heatmap-col:first-child .heatmap-cell:last-child:not(.today) {
   border-bottom-left-radius: calc(var(--grid-r) - 1px);
 }
-.heatmap-col:last-child .heatmap-cell:first-child {
+.heatmap-col:last-child .heatmap-cell:first-child:not(.today) {
   border-top-right-radius: calc(var(--grid-r) - 1px);
 }
-.heatmap-col:last-child .heatmap-cell:last-child {
+.heatmap-col:last-child .heatmap-cell:last-child:not(.today) {
   border-bottom-right-radius: calc(var(--grid-r) - 1px);
 }
 
@@ -308,16 +310,18 @@ html, body {
   cursor: default;
 }
 
-/* Rings sit outside the cell (outline, not inset shadow) — at this size an
-   inset ring eats most of the fill and you lose the mood colour. No offset now
-   the cells touch: the ring reads as a heavier rule around the day. */
+/* Today is a hole punched in the ruled sheet, not a ring drawn on top of it.
+   A ring is another line competing with the ruling; a shape is read before any
+   line is. It carries the default view on its own — nothing is "selected" when
+   you're on today. */
 .heatmap-cell.today {
-  outline: 1.5px solid var(--text-muted);
-  outline-offset: 0;
-  z-index: 1;
+  border-radius: 999px;
 }
 
-/* After .today so a selected today still reads as selected */
+/* Only a *past* day is ever selected, so this never lands on the circle. The
+   ring sits outside the cell (outline, not inset shadow) — at this size an
+   inset ring eats the fill and you lose the mood colour — and takes no offset
+   now the cells touch, so it reads as a heavier rule around the day. */
 .heatmap-cell.selected {
   outline: 2px solid var(--text);
   outline-offset: 0;
