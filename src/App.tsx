@@ -421,24 +421,24 @@ export function App() {
 
       {/* The rail's foot: clear-mood, back-to-today, then the two panels. The
           first two hold their space when they don't apply, so the stack never
-          shifts. An open panel covers this outright — it carries its own close
-          button instead. */}
+          shifts. A panel slides in underneath this, so the button that opened
+          one is still there to close it. */}
       <div className="dock">
         <button
-          className={`dock-btn dock-optional${mood !== null && !anySheetOpen ? ' visible' : ''}`}
+          className={`dock-btn dock-optional${mood !== null ? ' visible' : ''}`}
           onPointerDown={tap}
           onClick={() => handleMoodChange(null)}
           aria-label="Clear mood"
-          tabIndex={mood !== null && !anySheetOpen ? 0 : -1}
+          tabIndex={mood !== null ? 0 : -1}
         >
           <X size={18} strokeWidth={2.2} />
         </button>
         <button
-          className={`dock-btn dock-optional${isPast && !anySheetOpen ? ' visible' : ''}`}
+          className={`dock-btn dock-optional${isPast ? ' visible' : ''}`}
           onPointerDown={tap}
           onClick={() => setViewDate(null)}
           aria-label="Go to today"
-          tabIndex={isPast && !anySheetOpen ? 0 : -1}
+          tabIndex={isPast ? 0 : -1}
         >
           <ChevronLast size={20} strokeWidth={2} />
         </button>
@@ -462,7 +462,6 @@ export function App() {
 
       <TagSheet
         open={tagSheetOpen}
-        onClose={() => setTagSheetOpen(false)}
         onFilterDays={handleFilterDays}
         dataVersion={dataVersion}
         onDayClick={goToDate}
@@ -470,7 +469,6 @@ export function App() {
 
       <SettingsSheet
         open={settingsOpen}
-        onClose={() => setSettingsOpen(false)}
         dataVersion={dataVersion}
         theme={themePref}
         onThemeChange={handleThemeChange}

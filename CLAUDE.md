@@ -275,14 +275,17 @@ two media-scoped ones for the pre-JS first paint.
 ```css
 top: var(--content-top);   /* under the graph, down to the bottom of the screen */
 transform: translateX(100%) → translateX(0);
-z-index: 40;                                   /* scrim 39, dock 30 */
+z-index: 20;                     /* scrim 19; rail and dock 30, both on top */
 ```
 A panel turns the page **like a book: in from the right**, off the side the
 button that opened it lives on — not up from the bottom, which pointed away from
-the controls. It is full-bleed and paints over the mood rail *and the dock*, so
-the buttons are gone while it's open; a panel therefore carries its own way out,
-`SheetClose`, an X standing on `--rail-cx` — the same line the dock buttons it
-covered stand on. Panels are mutually exclusive.
+the controls. It is full-bleed but slides **under** the right-hand axis: the rail
+and the dock are the top layer (`z-index: 30`) and nothing covers them. So the
+button that opened a panel is still lit and still there to close it, and a panel
+needs no close button of its own — `SheetClose` existed for that and is gone.
+Panel content is inset on the right by `--rail-gutter` (`--rail-cx` plus half a
+dock button, i.e. where the controls reach), so no row runs under the buttons.
+Panels are mutually exclusive.
 
 **Panels are not resizable and have no stored height.** They fill from
 `--content-top` (the foot of the graph, so the grid always stays visible) to the
@@ -337,7 +340,6 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
   score. There is no description box — a stat that needs a sentence belongs in
   the expansion. Expanding a row lists the days *and* filters the heatmap (see
   below); collapsing or closing the sheet clears the filter.
-- `components/SheetClose.tsx` — the X every panel opens with, on the rail axis.
 - `components/SettingsSheet.tsx` — theme, data stats, export/import/clear.
 
 **Key patterns:**

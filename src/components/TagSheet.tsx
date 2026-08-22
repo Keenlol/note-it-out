@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Search, X } from 'lucide-react'
-import { SheetClose } from './SheetClose'
 import { SegmentedControl, type SegOption } from './SegmentedControl'
 import { getAllDays } from '../utils/storage'
 import { buildTagCatalog, getTagDays, type TagStat } from '../utils/tags'
@@ -18,7 +17,6 @@ const SORTS: SegOption<Sort>[] = [
 
 interface Props {
   open: boolean
-  onClose: () => void
   dataVersion: number
   onDayClick: (date: string) => void
   /** The days an expanded tag covers, for the heatmap to filter down to.
@@ -49,7 +47,7 @@ function sortTags(tags: TagStat[], sort: Sort): TagStat[] {
 }
 
 export function TagSheet({
-  open, onClose, dataVersion, onDayClick, onFilterDays,
+  open, dataVersion, onDayClick, onFilterDays,
 }: Props) {
   const [sort, setSort] = useState<Sort>('most')
   const [query, setQuery] = useState('')
@@ -80,8 +78,6 @@ export function TagSheet({
 
   return (
     <div className={`sheet${open ? ' open' : ''}`}>
-      <SheetClose onClose={onClose} />
-
       <div className="sheet-header">
         <div className="sheet-title-row">
           <span className="sheet-title">Tags</span>

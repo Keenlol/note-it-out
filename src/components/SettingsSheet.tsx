@@ -1,6 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
 import { Download, FileText, Trash2, Upload } from 'lucide-react'
-import { SheetClose } from './SheetClose'
 import { SegmentedControl, type SegOption } from './SegmentedControl'
 import type { ThemePref } from '../utils/theme'
 import { DARK_FROM_HOUR, DARK_UNTIL_HOUR } from '../utils/theme'
@@ -32,7 +31,6 @@ type ConfirmState =
 
 interface Props {
   open: boolean
-  onClose: () => void
   dataVersion: number
   theme: ThemePref
   onThemeChange: (pref: ThemePref) => void
@@ -48,7 +46,7 @@ function hour12(h: number): string {
 }
 
 export function SettingsSheet({
-  open, onClose, dataVersion, theme, onThemeChange, feedback, onFeedbackChange, onDataChanged,
+  open, dataVersion, theme, onThemeChange, feedback, onFeedbackChange, onDataChanged,
 }: Props) {
   const [confirm, setConfirm] = useState<ConfirmState>({ kind: 'none' })
   const fileRef = useRef<HTMLInputElement>(null)
@@ -82,8 +80,6 @@ export function SettingsSheet({
 
   return (
     <div className={`sheet${open ? ' open' : ''}`}>
-      <SheetClose onClose={onClose} />
-
       <div className="sheet-header">
         <div className="sheet-title-row">
           <span className="sheet-title">Settings</span>
