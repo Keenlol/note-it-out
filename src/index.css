@@ -1029,22 +1029,30 @@ html, body {
   align-self: flex-start;
 }
 
-/* Sliding pill — position driven by CSS custom properties set inline */
+/* Sliding pill — width and offset are measured off the active button, since
+   segments hug their labels and aren't all one width. */
 .seg-indicator {
   position: absolute;
   top: 3px;
   bottom: 3px;
-  left: 3px;
-  width: calc((100% - 6px) / var(--seg-n));
+  left: 0;
   border-radius: 6px;
   background: var(--text);
-  transform: translateX(calc(100% * var(--seg-i)));
-  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.22s cubic-bezier(0.16, 1, 0.3, 1),
+              width 0.22s cubic-bezier(0.16, 1, 0.3, 1);
   pointer-events: none;
 }
 
+/* Before the first measurement there is nothing to sit under, and no distance
+   worth animating from. */
+.seg-indicator.unmeasured {
+  opacity: 0;
+  transition: none;
+}
+
 .seg-btn {
-  flex: 1;
+  flex: 0 0 auto;
+  white-space: nowrap;
   background: none;
   border: none;
   color: var(--text-dim);
