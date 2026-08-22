@@ -720,6 +720,23 @@ html, body {
   background: transparent;   /* tap-catcher only — must not dim the heatmap */
 }
 
+/* A wash of the page colour down the control column, between a panel (20) and
+   the rail (30). A panel slides in *under* the controls, and without this its
+   leading edge would be seen travelling behind them; with it, the panel appears
+   to come out from under the rail instead of past it. It is --bg on --bg and
+   covers nothing — panel content stops at --rail-gutter and the note's text
+   stops short of that — so it is invisible except while something is moving. */
+.rail-veil {
+  position: fixed;
+  top: var(--content-top, 190px);
+  bottom: 0;
+  right: 0;
+  width: var(--rail-gutter);
+  z-index: 25;
+  pointer-events: none;
+  background: linear-gradient(to left, var(--bg) 45%, transparent);
+}
+
 .sheet {
   position: fixed;
   top: var(--content-top, 190px);
@@ -974,7 +991,7 @@ html, body {
 .settings-body {
   overflow-y: auto;
   flex: 1;
-  padding: 0 var(--pad) calc(var(--pad) + 56px);
+  padding: 0 var(--rail-gutter) calc(var(--pad) + 56px) var(--pad);
   display: flex;
   flex-direction: column;
   gap: 28px;

@@ -419,6 +419,10 @@ export function App() {
         />
       </div>
 
+      {/* Page colour down the control column: a panel passes under it, so it
+          comes out from under the rail rather than sliding behind it. */}
+      <div className="rail-veil" aria-hidden="true" />
+
       {/* The rail's foot: clear-mood, back-to-today, then the two panels. The
           first two hold their space when they don't apply, so the stack never
           shifts. A panel slides in underneath this, so the button that opened

@@ -285,6 +285,10 @@ button that opened a panel is still lit and still there to close it, and a panel
 needs no close button of its own — `SheetClose` existed for that and is gone.
 Panel content is inset on the right by `--rail-gutter` (`--rail-cx` plus half a
 dock button, i.e. where the controls reach), so no row runs under the buttons.
+`.rail-veil` fills that gutter with a left-fading wash of `--bg` at `z-index: 25`
+— between the panel and the controls — so a panel appears to come *out from
+under* the rail rather than to travel behind it. It is `--bg` on `--bg` over a
+strip nothing else paints in, so it changes nothing when the app is at rest.
 Panels are mutually exclusive.
 
 **Panels are not resizable and have no stored height.** They fill from
