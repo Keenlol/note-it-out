@@ -256,82 +256,49 @@ html, body {
   padding: var(--pad) var(--pad) 0;
 }
 
-/* One ruled sheet rather than 147 loose chips. The grid's own background is the
-   line colour and every cell paints over it, so the 1px padding and 1px gaps
-   *are* the rules — there is no cell border to keep in sync, and the lines
-   can't drift apart from the fills.
-
-   The block is rounded, but it is NOT clipped: overflow/mask would cut the
-   selection ring off the edge cells, and today always sits in the last column.
-   The four corner cells round their own outer corner instead, and the line
-   colour showing through behind them is what draws the curve. --grid-r and its
-   inner radius are one number apart (the 1px rule), so they stay concentric. */
-
 .heatmap-grid {
-  --grid-r: 10px;
   display: flex;
-  gap: 1px;
-  padding: 1px;
-  background: var(--cell-line);
-  border-radius: var(--grid-r);
+  gap: 3px;
 }
 
 .heatmap-col {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 1px;
+  gap: 3px;
 }
 
 .heatmap-cell {
   position: relative;
   width: 100%;
   aspect-ratio: 1;
+  border-radius: 3px;
+  border: 1px solid transparent;
   cursor: pointer;
-  transition: background 0.18s ease, border-radius 0.18s ease;
-}
-
-/* :not(.selected) because the selected day is round on every corner, and it can
-   be a corner cell — the two rules would otherwise fight over that corner. */
-.heatmap-col:first-child .heatmap-cell:first-child:not(.selected) {
-  border-top-left-radius: calc(var(--grid-r) - 1px);
-}
-.heatmap-col:first-child .heatmap-cell:last-child:not(.selected) {
-  border-bottom-left-radius: calc(var(--grid-r) - 1px);
-}
-.heatmap-col:last-child .heatmap-cell:first-child:not(.selected) {
-  border-top-right-radius: calc(var(--grid-r) - 1px);
-}
-.heatmap-col:last-child .heatmap-cell:last-child:not(.selected) {
-  border-bottom-right-radius: calc(var(--grid-r) - 1px);
+  transition: background 0.18s ease, box-shadow 0.15s ease;
 }
 
 .heatmap-cell.future {
   cursor: default;
 }
 
-/* The day you're on is a hole punched in the ruled sheet, not a ring drawn on
-   top of it: a ring is one more line competing with the ruling, and a shape is
-   read before any line is. It rounds into place as you move between days. */
-.heatmap-cell.selected {
-  border-radius: 999px;
+/* Rings sit outside the cell (outline, not inset shadow) — at this size an
+   inset ring eats most of the fill and you lose the mood colour. */
+.heatmap-cell.today {
+  outline: 1.5px solid var(--text-muted);
+  outline-offset: 1px;
 }
 
-/* Today only needs marking when you're somewhere else — when it's the day
-   you're on, the circle already says so. The ring sits outside the cell
-   (outline, not inset shadow: at this size an inset ring eats the mood colour)
-   and takes no offset now the cells touch. */
-.heatmap-cell.today:not(.selected) {
-  outline: 1.5px solid var(--text-muted);
-  outline-offset: 0;
-  z-index: 1;
+/* After .today so a selected today still reads as selected */
+.heatmap-cell.selected {
+  outline: 2px solid var(--text);
+  outline-offset: 1px;
 }
 
 .heatmap-months {
   display: grid;
   grid-template-columns: repeat(21, 1fr);
-  gap: 1px;
-  padding: 0 1px;
+  gap: 3px;
   margin-top: 6px;
 }
 

@@ -338,14 +338,7 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
   `--dock-h` derives from that count, and it feeds `--rail-h`, so adding a button
   shortens the rail rather than colliding with it.
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
-- `components/Heatmap.tsx` — 21-week grid, cell colour = mood. Drawn as one
-  ruled sheet, not loose chips: `.heatmap-grid` is the line colour and the 1px
-  padding and gaps are the rules, so every cell must paint an **opaque**
-  background (a transparent one floods with the rule colour) — including future
-  days, which is why they no longer read as distinct from empty ones. The block
-  is rounded by the four corner cells rounding their own outer corner, never by
-  clipping: `overflow: hidden` would cut the selection ring off the edge cells,
-  and today is always in the last column.
+- `components/Heatmap.tsx` — 21-week grid, cell colour = mood.
 - `components/TagSheet.tsx` — tag catalog, frequency and the tag × mood readout.
   Each tag is **one row**: mood dot, name in that colour, day count, average
   score. There is no description box — a stat that needs a sentence belongs in
@@ -378,13 +371,8 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - Tag autocomplete mirrors note-it-down's preset ghost: bare `#` or an ambiguous
   prefix → list chips as a hint and stay out of the way (Enter still inserts a
   newline); a unique prefix → inline ghost that Tab/Enter accepts.
-- **The selected day is a shape, not a ring**: `.heatmap-cell.selected` is
-  `border-radius: 999px`, a hole punched in the ruled sheet, and it rounds into
-  place as you move between days. Today keeps a faint ring, but only under
-  `:not(.selected)` — when today *is* the day you're on, the circle already says
-  so and a ring on top of it is redundant.
-- That ring uses `outline`, never an inset `box-shadow` — at cell size an inset
-  ring eats the mood colour — and no offset, now that the cells touch.
+- Selection rings on heatmap cells use `outline` + `outline-offset`, never an
+  inset `box-shadow` — at cell size an inset ring eats the mood colour.
 
 ## PWA
 

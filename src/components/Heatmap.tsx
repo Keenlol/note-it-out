@@ -41,17 +41,15 @@ const MIN_LABEL_GAP_COLS = 3
  * Three cell states, and they must stay distinguishable:
  *   mood set      → the temperature colour
  *   note, no mood → a faint fill (something happened here)
- *   nothing       → the page, showing through the ruling
+ *   nothing       → outline only
  * A blank day is genuinely blank, not a failure — so "empty" reads as absence,
- * never as the low end of the scale. Every cell paints an opaque background:
- * the grid's own colour is the rule between them, and a transparent cell would
- * let that flood the square.
+ * never as the low end of the scale.
  */
 function cellStyle(cell: Cell): React.CSSProperties {
-  if (cell.date === null) return { background: 'var(--bg)' }
-  if (cell.mood !== null) return { background: moodColor(cell.mood) }
-  if (cell.hasText) return { background: 'var(--cell-noted)' }
-  return { background: 'var(--bg)' }
+  if (cell.date === null) return { background: 'transparent', borderColor: 'transparent' }
+  if (cell.mood !== null) return { background: moodColor(cell.mood), borderColor: 'transparent' }
+  if (cell.hasText) return { background: 'var(--cell-noted)', borderColor: 'transparent' }
+  return { background: 'transparent', borderColor: 'var(--cell-line)' }
 }
 
 export function Heatmap({
