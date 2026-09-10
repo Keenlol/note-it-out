@@ -358,6 +358,13 @@ export function App() {
 
   const isPast = viewDate !== null
 
+  // Today's mood, regardless of which day is being viewed — colours the
+  // back-to-today button. Re-reads on save (dataVersion) rather than trusting
+  // `mood`, which tracks the *viewed* day, not today.
+  const todayMood = useMemo(() => (
+    isPast ? loadDay(todayKey())?.mood ?? null : mood
+  ), [isPast, mood, dataVersion])
+
   return (
     <div
       className="app"
@@ -423,10 +430,10 @@ export function App() {
           comes out from under the rail rather than sliding behind it. */}
       <div className="rail-veil" aria-hidden="true" />
 
-      {/* The rail's foot: clear-mood, back-to-today, then the two panels. The
-          first two hold their space when they don't apply, so the stack never
-          shifts. A panel slides in underneath this, so the button that opened
-          one is still there to close it. */}
+      {/* The rail's foot: clear-mood, the two panels, then back-to-today last.
+          Each optional slot holds its space when it doesn't apply, so the
+          stack never shifts. A panel slides in underneath this, so the button
+          that opened one is still there to close it. */}
       <div className="dock">
         <button
           className={`dock-btn dock-optional${mood !== null ? ' visible' : ''}`}
@@ -436,15 +443,6 @@ export function App() {
           tabIndex={mood !== null ? 0 : -1}
         >
           <X size={18} strokeWidth={2.2} />
-        </button>
-        <button
-          className={`dock-btn dock-optional${isPast ? ' visible' : ''}`}
-          onPointerDown={tap}
-          onClick={() => setViewDate(null)}
-          aria-label="Go to today"
-          tabIndex={isPast ? 0 : -1}
-        >
-          <ChevronLast size={20} strokeWidth={2} />
         </button>
         <button
           className={`dock-btn${tagSheetOpen ? ' active' : ''}`}
@@ -461,6 +459,16 @@ export function App() {
           aria-label="Settings"
         >
           <Settings size={20} strokeWidth={1.8} />
+        </button>
+        <button
+          className={`dock-btn dock-optional${isPast ? ' visible' : ''}`}
+          onPointerDown={tap}
+          onClick={() => setViewDate(null)}
+          aria-label="Go to today"
+          tabIndex={isPast ? 0 : -1}
+          style={todayMood !== null ? { color: moodColor(todayMood) } : undefined}
+        >
+          <ChevronLast size={20} strokeWidth={2} />
         </button>
       </div>
 
