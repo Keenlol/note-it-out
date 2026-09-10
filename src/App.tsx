@@ -417,11 +417,12 @@ export function App() {
           </div>
         </div>
 
-        {/* Note and mood both belong to the day, so both fade on a swipe. */}
+        {/* The note crossfades on a swipe; the rail deliberately doesn't — it's
+            the same scale on both days, and its thumb slides to the new mood
+            instead. See MoodSlider. */}
         <MoodSlider
           value={mood}
           onChange={handleMoodChange}
-          fade={noteOpacity}
           feedback={feedback}
         />
       </div>

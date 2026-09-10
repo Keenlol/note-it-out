@@ -439,28 +439,6 @@ html, body {
   opacity: 1;
 }
 
-/* Armed: dragged past CLEAR_DISTANCE beyond either end (MoodSlider.tsx) — a
-   preview of "gone" rather than the swell a normal drag gets. The label swaps
-   to "clear" and takes --delete, the one place this control borrows the
-   destructive colour.
-
-   This has to come *after* the .dragging swell above: armed only ever happens
-   mid-drag, and at equal specificity the later rule wins — stated earlier, the
-   ghost wouldn't appear until the finger lifted, which is exactly when it has
-   stopped being a preview. */
-.mood-slider.clearing .mood-track {
-  opacity: 0.16;
-}
-
-.mood-slider.clearing .mood-thumb {
-  opacity: 0.3;
-  transform: translate(-50%, -50%) scale(0.7);
-}
-
-.mood-slider.clearing .mood-label {
-  color: var(--delete);
-}
-
 .mood-step {
   flex: 1;
 }
@@ -486,8 +464,16 @@ html, body {
   border: 3px solid var(--bg);
   transform: translate(-50%, -50%);
   box-shadow: var(--shadow-thumb);
+  /* Always mounted, hidden by opacity on a day with no mood — see MoodSlider.
+     Unmounting it would pop, and a day change should hand the thumb over, not
+     replace it. */
+  opacity: 0;
   transition: top 0.4s var(--spring), background 0.2s ease,
               width 0.2s ease, height 0.2s ease, opacity 0.15s ease, transform 0.15s ease;
+}
+
+.mood-slider.set .mood-thumb {
+  opacity: 1;
 }
 
 /* Under the finger the thumb IS the finger: no easing on position, or it lags
@@ -520,6 +506,28 @@ html, body {
 
 .mood-label.visible {
   opacity: 1;
+}
+
+/* Armed: dragged past CLEAR_DISTANCE beyond either end (MoodSlider.tsx) — a
+   preview of "gone" rather than the swell a normal drag gets. The label swaps
+   to "clear" and takes --delete, the one place this control borrows the
+   destructive colour.
+
+   Armed overrides every resting state above — the .dragging swell, the .set
+   track and the .set thumb — all at equal specificity, so this block has to
+   stay *last*. Stated earlier it would lose, and the ghost wouldn't appear
+   until the finger lifted, which is exactly when it stops being a preview. */
+.mood-slider.clearing .mood-track {
+  opacity: 0.16;
+}
+
+.mood-slider.clearing .mood-thumb {
+  opacity: 0.3;
+  transform: translate(-50%, -50%) scale(0.7);
+}
+
+.mood-slider.clearing .mood-label {
+  color: var(--delete);
 }
 
 /* Position and size stop animating; the fades stay — they carry no motion. */

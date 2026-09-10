@@ -7,8 +7,6 @@ import { detent, type FeedbackPref } from '../utils/feedback'
 interface Props {
   value: number | null
   onChange: (value: number | null) => void
-  /** Opacity for the day-change fade. The mood belongs to the day it labels. */
-  fade?: number
   /** How to mark each band edge — a buzz, a click, or nothing. A settings
    *  choice, not a capability check; see utils/feedback.ts. */
   feedback?: FeedbackPref
@@ -44,8 +42,14 @@ const CLEAR_DISTANCE = 56
  *
  * The label is deliberately transient — the colour is the permanent readout, and
  * a permanently visible grade would make the day feel scored.
+ *
+ * It does *not* fade out and back when you swipe to another day, the way the
+ * note does. The note's text is replaced, so a crossfade is honest there; the
+ * rail is the same seven bands either side of the swipe, and blinking it out
+ * made the right edge flicker on every page turn. The thumb carries the change
+ * instead — it springs to the new day's band and cross-fades its colour.
  */
-export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: Props) {
+export function MoodSlider({ value, onChange, feedback = 'vibrate' }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const lastIndex = useRef<number | null>(null)
@@ -158,21 +162,29 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
   const isSet = value !== null
   const isDragging = dragPct !== null
 
+  // The thumb outlives the value it shows: it stays mounted on a day with no
+  // mood and only fades (CSS). So while it's invisible it holds the last band
+  // it stood on rather than snapping to 0 — otherwise clearing a mood, or
+  // swiping onto a blank day, would slide it to the cold end and flip it blue
+  // on the way out.
+  const lastSet = useRef(0)
+  if (value !== null) lastSet.current = value
+  const shown = value ?? lastSet.current
+
   // At rest the thumb sits on the *middle* of its band, not at the end of the
   // track: a step is a stretch of the ramp, so its centre is where it belongs.
-  const restPct = isSet ? (1 - (value + 0.5) / MOOD_COUNT) * 100 : 50
+  const restPct = (1 - (shown + 0.5) / MOOD_COUNT) * 100
   const pct = dragPct ?? restPct
 
   // Mid-drag the thumb carries the blended colour of where it actually is, so
   // it reads as a point sliding along the ramp rather than a chip that flips.
   const thumbColor = isDragging
     ? moodColorMix(Math.max(0, Math.min(MOOD_MAX, (1 - pct / 100) * MOOD_COUNT - 0.5)))
-    : moodColor(value ?? 0)
+    : moodColor(shown)
 
   return (
     <div
       className="mood-column"
-      style={{ opacity: fade }}
       // The page swipes to change day; a drag on the rail is never that.
       onTouchStart={e => e.stopPropagation()}
       onTouchMove={e => e.stopPropagation()}
@@ -202,9 +214,7 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
         </div>
 
         <div className="mood-rail" ref={railRef} aria-hidden="true">
-          {isSet && (
-            <div className="mood-thumb" style={{ top: `${pct}%`, background: thumbColor }} />
-          )}
+          <div className="mood-thumb" style={{ top: `${pct}%`, background: thumbColor }} />
           <div
             className={`mood-label${labelVisible && (isSet || clearArmed) ? ' visible' : ''}`}
             style={{ top: `${pct}%` }}
