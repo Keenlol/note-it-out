@@ -22,6 +22,13 @@ const LABEL_LINGER_MS = 900
  *  slider hits its travel limit. */
 const THUMB_STOP = 13
 
+/** How far past either end of the track (px) the finger has to pull — beyond
+ *  the thumb's own travel limit — before releasing clears the mood. Pointer
+ *  capture keeps delivering clientY out there, past the element's own box, so
+ *  this reads as pulling the thumb clean off the rail rather than a tap near
+ *  an edge band. */
+const CLEAR_DISTANCE = 56
+
 /**
  * The day's mood, as one discrete vertical rail down the right edge.
  *
@@ -42,22 +49,31 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
   const railRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const lastIndex = useRef<number | null>(null)
+  const armed = useRef(false)
   const linger = useRef<ReturnType<typeof setTimeout> | undefined>(undefined)
   const [labelVisible, setLabelVisible] = useState(false)
   // Live thumb position as a % from the top; null whenever the finger is up.
   const [dragPct, setDragPct] = useState<number | null>(null)
+  // Mirrors `armed` for render — true once the drag has passed CLEAR_DISTANCE
+  // past either end of the track.
+  const [clearArmed, setClearArmed] = useState(false)
 
   useEffect(() => () => clearTimeout(linger.current), [])
 
-  /** Reads the pointer as both a band (the value) and a position (the thumb). */
-  function readPointer(clientY: number): { band: number; pct: number } | null {
+  /** Reads the pointer as a band (the value), a position (the thumb), and how
+   *  far past either end of the track it's travelled (0 while inside it). */
+  function readPointer(clientY: number): { band: number; pct: number; overshoot: number } | null {
     const rect = railRef.current?.getBoundingClientRect()
     if (!rect || rect.height === 0) return null
     const fromTop = Math.max(0, Math.min(1, (clientY - rect.top) / rect.height))
     // Top of the rail is the warm end, so the band index counts from the bottom.
     const band = Math.max(0, Math.min(MOOD_MAX, Math.floor((1 - fromTop) * MOOD_COUNT)))
     const stop = (THUMB_STOP / rect.height) * 100
-    return { band, pct: Math.max(stop, Math.min(100 - stop, fromTop * 100)) }
+    const pct = Math.max(stop, Math.min(100 - stop, fromTop * 100))
+    const overshoot = clientY < rect.top ? rect.top - clientY
+      : clientY > rect.bottom ? clientY - rect.bottom
+      : 0
+    return { band, pct, overshoot }
   }
 
   function commit(index: number) {
@@ -83,13 +99,25 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
   function track(clientY: number) {
     const at = readPointer(clientY)
     if (!at) return
+    const isArmed = at.overshoot > CLEAR_DISTANCE
+    if (isArmed !== armed.current) {
+      armed.current = isArmed
+      setClearArmed(isArmed)
+      // Arming (or backing off) the clear gesture is a threshold crossing
+      // just like a band edge — same single feedback event, no second kind.
+      detent(feedback)
+    }
     setDragPct(at.pct)
-    commit(at.band)
+    // Once armed the band is about to be thrown away; stop moving it so the
+    // last real value stays put underneath the "clear" label.
+    if (!isArmed) commit(at.band)
   }
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     dragging.current = true
     lastIndex.current = value
+    armed.current = false
+    setClearArmed(false)
     e.currentTarget.setPointerCapture(e.pointerId)
     showLabel()
     track(e.clientY)
@@ -104,6 +132,9 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
     if (!dragging.current) return
     dragging.current = false
     try { e.currentTarget.releasePointerCapture(e.pointerId) } catch { /* already released */ }
+    if (armed.current) onChange(null)
+    armed.current = false
+    setClearArmed(false)
     setDragPct(null)          // hands the thumb back to the spring
     hideLabelSoon()
   }
@@ -148,7 +179,7 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
       onTouchEnd={e => e.stopPropagation()}
     >
       <div
-        className={`mood-slider${isSet ? ' set' : ''}${isDragging ? ' dragging' : ''}`}
+        className={`mood-slider${isSet ? ' set' : ''}${isDragging ? ' dragging' : ''}${clearArmed ? ' clearing' : ''}`}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -161,7 +192,7 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
         aria-valuemin={0}
         aria-valuemax={MOOD_MAX}
         aria-valuenow={value ?? undefined}
-        aria-valuetext={isSet ? moodLabel(value) : 'not set'}
+        aria-valuetext={clearArmed ? 'release to clear' : isSet ? moodLabel(value) : 'not set'}
       >
         {/* Warm end at the top, so the array runs backwards down the track. */}
         <div className="mood-track" aria-hidden="true">
@@ -175,10 +206,10 @@ export function MoodSlider({ value, onChange, fade = 1, feedback = 'vibrate' }: 
             <div className="mood-thumb" style={{ top: `${pct}%`, background: thumbColor }} />
           )}
           <div
-            className={`mood-label${labelVisible && isSet ? ' visible' : ''}`}
+            className={`mood-label${labelVisible && (isSet || clearArmed) ? ' visible' : ''}`}
             style={{ top: `${pct}%` }}
           >
-            {moodLabel(value)}
+            {clearArmed ? 'clear' : moodLabel(value)}
           </div>
         </div>
       </div>

@@ -163,8 +163,8 @@ spans days, and colouring it by any one day's mood would be a lie.
 
 `--rail-cx` = `--pad + --track-rest-w/2`: the mood rail's centre line, measured
 from the right edge of the screen. The heatmap grid ends on `--pad`, the rail's
-track sits just inside that same edge, and the dock (clear-mood, tags, settings)
-is centred on the line beneath it. **Anything else pinned to the right derives
+track sits just inside that same edge, and the dock (back-to-today, tags,
+settings) is centred on the line beneath it. **Anything else pinned to the right derives
 its position from `--rail-cx`** — the page gets one vertical axis, not three, and
 it stays aligned if `--pad` ever changes. Nothing here is nudged by eye.
 
@@ -330,12 +330,19 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
 - `components/MoodSlider.tsx` — the day's mood. A discrete vertical rail down
   the right edge, warm end at the top; label on drag only. A step rests at the
   **middle of its band**, not at the end of the track, and a touch anywhere in a
-  band selects it. The rail renders only the track; clearing the mood lives in
-  the dock in `App.tsx` with back-to-today and the two sheet toggles, since all
-  four are one stack on the same axis. The dock is a **fixed column of four** —
-  clear-mood and back-to-today hold their space (`.dock-optional`, opacity only)
-  when they don't apply, so the buttons below them never shift under a thumb.
-  `--dock-h` derives from that count, and it feeds `--rail-h`, so adding a button
+  band selects it. Clearing is a gesture, not a button: drag the thumb past
+  either end of the track — beyond `CLEAR_DISTANCE` (56px), past the pointer's
+  own capture, since `setPointerCapture` keeps delivering `clientY` outside the
+  element's box — and the track fades and the label swaps to "clear"; let go
+  there and the mood is cleared, release before that and nothing happens. The
+  crossing gets the same single `detent()` a band edge gets, not a second kind
+  of feedback event. Backspace/Delete on the focused rail clears it too, for
+  keyboard use.
+- `App.tsx`'s dock — back-to-today and the two sheet toggles — is a **fixed
+  column of three**. Back-to-today holds its space (`.dock-optional`, opacity
+  only) when you're already on today, so tags/settings never shift under a
+  thumb; it also tints to today's mood colour when one is set. `--dock-h`
+  derives from the button count, and it feeds `--rail-h`, so adding a button
   shortens the rail rather than colliding with it.
 - `components/Editor.tsx` — textarea + overlay for tag highlighting and ghost text.
 - `components/Heatmap.tsx` — 21-week grid, cell colour = mood.

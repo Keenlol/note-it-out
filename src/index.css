@@ -95,7 +95,7 @@
   /* The dock at the foot of the rail. Derive --dock-h, never restate it. */
   --dock-btn: 40px;
   --dock-gap: 6px;
-  --dock-h: calc(4 * var(--dock-btn) + 3 * var(--dock-gap));
+  --dock-h: calc(3 * var(--dock-btn) + 2 * var(--dock-gap));
   /* How far in from the right edge the controls reach: the axis plus half a
      button. A panel slides in *under* the rail, so its content stops here. */
   --rail-gutter: calc(var(--rail-cx) + var(--dock-btn) / 2);
@@ -413,6 +413,23 @@ html, body {
   --thumb-d: 27px;
 }
 
+/* Armed: dragged past CLEAR_DISTANCE beyond either end (MoodSlider.tsx) — a
+   preview of "gone" rather than the swell a normal drag gets. The label swaps
+   to "clear" and takes --delete, the one place this control borrows the
+   destructive colour. */
+.mood-slider.clearing .mood-track {
+  opacity: 0.16;
+}
+
+.mood-slider.clearing .mood-thumb {
+  opacity: 0.3;
+  transform: translate(-50%, -50%) scale(0.7);
+}
+
+.mood-slider.clearing .mood-label {
+  color: var(--delete);
+}
+
 .mood-slider:focus-visible .mood-track {
   box-shadow: 0 0 0 2px var(--accent-tint), 0 0 0 3px var(--accent);
 }
@@ -465,13 +482,14 @@ html, body {
   transform: translate(-50%, -50%);
   box-shadow: var(--shadow-thumb);
   transition: top 0.4s var(--spring), background 0.2s ease,
-              width 0.2s ease, height 0.2s ease;
+              width 0.2s ease, height 0.2s ease, opacity 0.15s ease, transform 0.15s ease;
 }
 
 /* Under the finger the thumb IS the finger: no easing on position, or it lags
    behind the touch and stops feeling like an object you're holding. */
 .mood-slider.dragging .mood-thumb {
-  transition: background 0.12s linear, width 0.2s ease, height 0.2s ease;
+  transition: background 0.12s linear, width 0.2s ease, height 0.2s ease,
+              opacity 0.15s ease, transform 0.15s ease;
 }
 
 /* Left of the thumb — it floats over the note, so it carries its own pill. */
@@ -488,11 +506,11 @@ html, body {
   padding: 3px 11px;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.18s ease, top 0.4s var(--spring);
+  transition: opacity 0.18s ease, top 0.4s var(--spring), color 0.15s ease;
 }
 
 .mood-slider.dragging .mood-label {
-  transition: opacity 0.18s ease;
+  transition: opacity 0.18s ease, color 0.15s ease;
 }
 
 .mood-label.visible {
@@ -504,9 +522,9 @@ html, body {
   .mood-slider .mood-track,
   .mood-slider.dragging .mood-track { transition: opacity 0.22s ease; }
   .mood-slider .mood-thumb,
-  .mood-slider.dragging .mood-thumb { transition: background 0.2s ease; }
+  .mood-slider.dragging .mood-thumb { transition: background 0.2s ease, opacity 0.15s ease; }
   .mood-slider .mood-label,
-  .mood-slider.dragging .mood-label { transition: opacity 0.18s ease; }
+  .mood-slider.dragging .mood-label { transition: opacity 0.18s ease, color 0.15s ease; }
 }
 
 /* ── Editor ── */
@@ -642,10 +660,12 @@ html, body {
 }
 
 /* ── Dock ─────────────────────────────────────────────────────────────────
-   The foot of the rail: clear-mood, back-to-today, then the two sheets, stacked
-   on the same --rail-cx line so the right edge of the app is one column from
-   the heatmap down. Fixed rather than in flow, because these stay reachable while
+   The foot of the rail: back-to-today, then the two sheets, stacked on the
+   same --rail-cx line so the right edge of the app is one column from the
+   heatmap down. Fixed rather than in flow, because these stay reachable while
    a long note scrolls and stay above an open sheet, the way a tab bar does.
+   Clearing the mood lives in the slider itself now (drag past either end of
+   the track and let go), not in this stack.
    .mood-column reserves --dock-h so the rail ends exactly where this starts. */
 
 .dock {
@@ -687,10 +707,9 @@ html, body {
   color: var(--text);
 }
 
-/* Two of the four only apply sometimes: clearing, when there's a mood to clear,
-   and back-to-today, when you're not on today. Space is held either way — the
-   stack is a fixed column of four, so nothing below ever moves under your
-   thumb. */
+/* Back-to-today only applies when you're not on today. Space is held either
+   way — the stack is a fixed column of three, so nothing below it ever moves
+   under your thumb. */
 .dock-optional {
   opacity: 0;
   pointer-events: none;

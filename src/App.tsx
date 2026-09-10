@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { Check, ChevronLast, Hash, Settings, X } from 'lucide-react'
+import { Check, ChevronLast, Hash, Settings } from 'lucide-react'
 import { Heatmap } from './components/Heatmap'
 import { Editor, type Suggestion } from './components/Editor'
 import { MoodSlider } from './components/MoodSlider'
@@ -430,19 +430,21 @@ export function App() {
           comes out from under the rail rather than sliding behind it. */}
       <div className="rail-veil" aria-hidden="true" />
 
-      {/* The rail's foot: clear-mood, the two panels, then back-to-today last.
-          Each optional slot holds its space when it doesn't apply, so the
-          stack never shifts. A panel slides in underneath this, so the button
-          that opened one is still there to close it. */}
+      {/* The rail's foot: back-to-today, then the two panels. Back-to-today
+          holds its space when it doesn't apply, so the stack never shifts.
+          Clearing the mood now lives in the slider itself — drag it past
+          either end of the track and let go. A panel slides in underneath
+          this, so the button that opened one is still there to close it. */}
       <div className="dock">
         <button
-          className={`dock-btn dock-optional${mood !== null ? ' visible' : ''}`}
+          className={`dock-btn dock-optional${isPast ? ' visible' : ''}`}
           onPointerDown={tap}
-          onClick={() => handleMoodChange(null)}
-          aria-label="Clear mood"
-          tabIndex={mood !== null ? 0 : -1}
+          onClick={() => setViewDate(null)}
+          aria-label="Go to today"
+          tabIndex={isPast ? 0 : -1}
+          style={todayMood !== null ? { color: moodColor(todayMood) } : undefined}
         >
-          <X size={18} strokeWidth={2.2} />
+          <ChevronLast size={20} strokeWidth={2} />
         </button>
         <button
           className={`dock-btn${tagSheetOpen ? ' active' : ''}`}
@@ -459,16 +461,6 @@ export function App() {
           aria-label="Settings"
         >
           <Settings size={20} strokeWidth={1.8} />
-        </button>
-        <button
-          className={`dock-btn dock-optional${isPast ? ' visible' : ''}`}
-          onPointerDown={tap}
-          onClick={() => setViewDate(null)}
-          aria-label="Go to today"
-          tabIndex={isPast ? 0 : -1}
-          style={todayMood !== null ? { color: moodColor(todayMood) } : undefined}
-        >
-          <ChevronLast size={20} strokeWidth={2} />
         </button>
       </div>
 
