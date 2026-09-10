@@ -702,17 +702,16 @@ html, body {
 }
 
 /* Tags and settings sit at rest here, not tucked away like back-to-today —
-   full opacity, the same colour a tag row's name reads at (.tag-name). */
+   the same idle/lit pair the theme segmented control uses (.seg-btn /
+   .seg-btn.active): --text-dim at rest, --text once open. */
 .dock-btn:not(.dock-optional) {
-  color: var(--text);
+  color: var(--text-dim);
 }
 
 /* Lit state is driven only by .active so each button follows its own logic
-   and a tap on one can never light another (hover sticks on touch). Now that
-   idle is already full-strength --text, lit needs its own colour rather than
-   just more opacity — --accent, the app's one interactive/highlight hue. */
+   and a tap on one can never light another (hover sticks on touch). */
 .dock-btn.active {
-  color: var(--accent);
+  color: var(--text);
 }
 
 /* Back-to-today only applies when you're not on today. Space is held either
