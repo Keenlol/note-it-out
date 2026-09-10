@@ -65,10 +65,29 @@ self.addEventListener('activate', e => {
 
 self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
   // Navigation: serve fresh page, fall back to cached index.html offline
   if (e.request.mode === 'navigate') {
     e.respondWith(
       fetch(e.request).catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+  // Only /assets/* is content-hashed. The rest of the precache list keeps a
+  // stable URL, so cache-first would pin it for the life of the cache — and
+  // /manifest.json is read back through this handler when Chrome checks an
+  // installed PWA for updates. Hand it the cached copy and it never sees an
+  // edit, so a theme_color change can't reach the home screen on its own.
+  // Network-first, cache as the offline fallback.
+  if (url.origin === self.location.origin && !url.pathname.startsWith('/assets/')) {
+    e.respondWith(
+      fetch(e.request)
+        .then(res => {
+          const clone = res.clone();
+          caches.open(CACHE).then(c => c.put(e.request, clone)).catch(() => {});
+          return res;
+        })
+        .catch(() => caches.match(e.request))
     );
     return;
   }
