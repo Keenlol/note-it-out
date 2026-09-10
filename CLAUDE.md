@@ -394,5 +394,16 @@ Note `apple-mobile-web-app-status-bar-style` is `default`, **not**
 `black-translucent` as in note-it-down: translucent draws white status-bar text,
 which is invisible on warm paper. The cost is no edge-to-edge under the status bar.
 
+`manifest.json`'s `theme_color`/`background_color` are **`#14120f` (dark)**, not
+`--bg`'s light value. On Android, a standalone-launched PWA's status bar takes
+this straight from the manifest and does not track the live `theme-color` meta
+tag `applyTheme` (`utils/theme.ts`) keeps in sync for the browser-tab case — the
+manifest spec has no light/dark variant for it (`media_overrides` is still a
+proposal, unshipped). One static value is picked here on the bet that a daily
+journal gets opened disproportionately at the evening/night ends of the day,
+inside the app's own dark window (19:00–06:00) — so it's still wrong during
+the day, just wrong less often. If that bet stops paying off, the fix is this
+one pair of values, not the meta-tag logic, which is already correct.
+
 `public/favicon.svg` and `public/icon-maskable.svg` are the sources; the PNGs are
 rendered from them. They are placeholders — the mood ramp as a 3×3 grid.
