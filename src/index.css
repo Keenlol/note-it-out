@@ -413,23 +413,6 @@ html, body {
   --thumb-d: 27px;
 }
 
-/* Armed: dragged past CLEAR_DISTANCE beyond either end (MoodSlider.tsx) — a
-   preview of "gone" rather than the swell a normal drag gets. The label swaps
-   to "clear" and takes --delete, the one place this control borrows the
-   destructive colour. */
-.mood-slider.clearing .mood-track {
-  opacity: 0.16;
-}
-
-.mood-slider.clearing .mood-thumb {
-  opacity: 0.3;
-  transform: translate(-50%, -50%) scale(0.7);
-}
-
-.mood-slider.clearing .mood-label {
-  color: var(--delete);
-}
-
 .mood-slider:focus-visible .mood-track {
   box-shadow: 0 0 0 2px var(--accent-tint), 0 0 0 3px var(--accent);
 }
@@ -454,6 +437,28 @@ html, body {
 .mood-slider.set .mood-track,
 .mood-slider.dragging .mood-track {
   opacity: 1;
+}
+
+/* Armed: dragged past CLEAR_DISTANCE beyond either end (MoodSlider.tsx) — a
+   preview of "gone" rather than the swell a normal drag gets. The label swaps
+   to "clear" and takes --delete, the one place this control borrows the
+   destructive colour.
+
+   This has to come *after* the .dragging swell above: armed only ever happens
+   mid-drag, and at equal specificity the later rule wins — stated earlier, the
+   ghost wouldn't appear until the finger lifted, which is exactly when it has
+   stopped being a preview. */
+.mood-slider.clearing .mood-track {
+  opacity: 0.16;
+}
+
+.mood-slider.clearing .mood-thumb {
+  opacity: 0.3;
+  transform: translate(-50%, -50%) scale(0.7);
+}
+
+.mood-slider.clearing .mood-label {
+  color: var(--delete);
 }
 
 .mood-step {
