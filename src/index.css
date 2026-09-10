@@ -701,10 +701,18 @@ html, body {
   transition: color 0.1s, opacity 0.2s ease;
 }
 
-/* Lit state is driven only by .active so each button follows its own logic and
-   a tap on one can never light another (hover sticks on touch). */
-.dock-btn.active {
+/* Tags and settings sit at rest here, not tucked away like back-to-today —
+   full opacity, the same colour a tag row's name reads at (.tag-name). */
+.dock-btn:not(.dock-optional) {
   color: var(--text);
+}
+
+/* Lit state is driven only by .active so each button follows its own logic
+   and a tap on one can never light another (hover sticks on touch). Now that
+   idle is already full-strength --text, lit needs its own colour rather than
+   just more opacity — --accent, the app's one interactive/highlight hue. */
+.dock-btn.active {
+  color: var(--accent);
 }
 
 /* Back-to-today only applies when you're not on today. Space is held either
