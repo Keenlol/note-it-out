@@ -321,6 +321,16 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
   **per day, not per occurrence**.
 - `utils/mood.ts` — the scale, labels and colour helpers.
 - `utils/feedback.ts` — the detent, as a buzz or as a click.
+- `utils/lock.ts` — the app lock. WebAuthn against a *platform* authenticator
+  is the only web API that can put up the OS's own unlock sheet (fingerprint,
+  face, PIN — Touch ID and Windows Hello too). There is no server, so the
+  signature is never checked: the guarantee is that the browser refuses to
+  resolve `credentials.get()` until the OS has verified the person. **A door,
+  not a safe** — the notes stay in plain `localStorage` underneath, and the
+  settings copy says so. `enrollLock` registers once and keeps the credential
+  id under `lock_credential` (never exported; it's bound to this device and
+  origin); `verifyLock` asks for that exact id and returns false for *every*
+  failure, since from the lock screen they all mean "still locked".
 - `utils/theme.ts`, `utils/settings.ts`, `utils/data.ts` (export/import/stats),
   `utils/window.ts` (21-week heatmap geometry), `utils/format.ts`, `utils/tap.ts`.
 
@@ -351,7 +361,25 @@ Single-page React 19 + TypeScript app, no backend. All data lives in `localStora
   score. There is no description box — a stat that needs a sentence belongs in
   the expansion. Expanding a row lists the days *and* filters the heatmap (see
   below); collapsing or closing the sheet clears the filter.
-- `components/SettingsSheet.tsx` — theme, data stats, export/import/clear.
+- `components/SettingsSheet.tsx` — theme, lock, data stats, export/import/clear.
+  The lock's state lives here, not in App — the gate reads storage directly, so
+  nothing above the sheet needs to know. Turning it on only flips the control
+  once the OS ceremony has actually succeeded; turning it off needs no ceremony
+  (whoever is here already got past it). The section is replaced by a one-line
+  reason when the lock can't be offered (not https, no screen lock, no API).
+- `components/LockGate.tsx` — wraps `<App>` in `main.tsx`. While locked the app
+  stays **mounted** but `inert` and `visibility: hidden`, under an opaque lock
+  screen at `z-index: 40` (above the rail and dock) — so a quick trip away and
+  back lands on the same day, scroll and caret. Locking is decided when the
+  page becomes *visible* again (only the return knows how long it was away),
+  against the grace period in settings (`now | 1m | 5m`, default a minute), and
+  flushed with `flushSync` so the note is never painted for a frame before the
+  lock is. Whether the lock is on and the grace are read from storage at that
+  moment, never cached. The lock screen prompts on mount (a silent failure
+  there just leaves the glyph to tap — some browsers want a gesture first) and
+  offers one way out for someone whose credential the OS has lost: **reset**,
+  which wipes every day, drops the lock and reloads. That is the whole escape
+  hatch — anything softer would be a bypass.
 
 **Key patterns:**
 

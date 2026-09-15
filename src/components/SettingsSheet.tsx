@@ -1,4 +1,4 @@
-import { useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Download, FileText, Trash2, Upload } from 'lucide-react'
 import { SegmentedControl, type SegOption } from './SegmentedControl'
 import type { ThemePref } from '../utils/theme'
@@ -9,6 +9,10 @@ import {
 } from '../utils/data'
 import { tap } from '../utils/tap'
 import type { FeedbackPref } from '../utils/feedback'
+import {
+  disableLock, enrollLock, isLockEnabled, lockSupport, type LockGrace, type LockSupport,
+} from '../utils/lock'
+import { getSavedLockGrace, saveLockGrace } from '../utils/settings'
 
 const THEMES: SegOption<ThemePref>[] = [
   { value: 'light', label: 'Light' },
@@ -21,6 +25,26 @@ const FEEDBACK: SegOption<FeedbackPref>[] = [
   { value: 'click', label: 'Click' },
   { value: 'off', label: 'Off' },
 ]
+
+type LockPref = 'off' | 'on'
+
+const LOCK: SegOption<LockPref>[] = [
+  { value: 'off', label: 'Off' },
+  { value: 'on', label: 'On' },
+]
+
+const LOCK_GRACE: SegOption<LockGrace>[] = [
+  { value: 'now', label: 'Right away' },
+  { value: '1m', label: 'A minute' },
+  { value: '5m', label: '5 minutes' },
+]
+
+/** Why the lock can't be offered here, in the user's terms. */
+const LOCK_UNAVAILABLE: Record<Exclude<LockSupport, 'ok'>, string> = {
+  insecure: 'Not available here — the app has to be served over https for the browser to allow it.',
+  unsupported: 'Not available in this browser.',
+  'no-authenticator': 'Not available — this device has no screen lock set up, or the browser can’t use it.',
+}
 
 
 type ConfirmState =
@@ -52,6 +76,43 @@ export function SettingsSheet({
   const fileRef = useRef<HTMLInputElement>(null)
 
   const stats = useMemo(() => getStats(), [dataVersion])
+
+  // ── Lock ────────────────────────────────────────────────────────────────
+  // Owned here rather than in App: the gate reads storage directly, so nothing
+  // above this sheet needs to know.
+  const [lockSupported, setLockSupported] = useState<LockSupport | 'checking'>('checking')
+  const [lockOn, setLockOn] = useState(() => isLockEnabled())
+  const [lockGrace, setLockGrace] = useState<LockGrace>(() => getSavedLockGrace())
+  const [lockError, setLockError] = useState<string | null>(null)
+  const enrolling = useRef(false)
+
+  useEffect(() => { void lockSupport().then(setLockSupported) }, [])
+
+  async function handleLockChange(pref: LockPref) {
+    if (pref === 'off') {
+      // Turning it off needs no ceremony: whoever is here already got past it.
+      disableLock()
+      setLockOn(false)
+      return
+    }
+    if (lockOn || enrolling.current) return
+    enrolling.current = true
+    setLockError(null)
+    try {
+      // The OS verifies the person as part of enrolling — that is the first
+      // unlock — so the control only flips once it has actually happened.
+      if (await enrollLock()) setLockOn(true)
+    } catch {
+      setLockError('Couldn’t set the lock up. Check the device has a screen lock, then try again.')
+    } finally {
+      enrolling.current = false
+    }
+  }
+
+  function handleLockGraceChange(pref: LockGrace) {
+    setLockGrace(pref)
+    saveLockGrace(pref)
+  }
 
   async function onFilePicked(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
@@ -103,6 +164,30 @@ export function SettingsSheet({
             Click is a sound, for a laptop. Picking one plays it.
           </p>
           <SegmentedControl options={FEEDBACK} value={feedback} onChange={onFeedbackChange} />
+        </div>
+
+        <div className="settings-section">
+          <span className="settings-section-label">Lock</span>
+          <p className="settings-section-hint">
+            Ask for this device’s own unlock — fingerprint, face or PIN — before
+            the app shows anything. Nothing new to remember. The notes themselves
+            stay unencrypted on the device: this keeps out someone holding your
+            phone, not someone taking it apart.
+          </p>
+          {lockSupported === 'ok' ? (
+            <SegmentedControl options={LOCK} value={lockOn ? 'on' : 'off'} onChange={handleLockChange} />
+          ) : lockSupported !== 'checking' && (
+            <p className="settings-section-hint settings-section-note">{LOCK_UNAVAILABLE[lockSupported]}</p>
+          )}
+          {lockError && <p className="settings-section-hint settings-section-error">{lockError}</p>}
+          {lockOn && (
+            <>
+              <p className="settings-section-hint">
+                Lock again when you come back to the app after being away for…
+              </p>
+              <SegmentedControl options={LOCK_GRACE} value={lockGrace} onChange={handleLockGraceChange} />
+            </>
+          )}
         </div>
 
         <div className="settings-section">

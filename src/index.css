@@ -1057,6 +1057,16 @@ html, body {
   margin-top: -6px;
 }
 
+/* A hint standing in for a control it can't offer: a little firmer than the
+   explanatory line above it, so it reads as an answer rather than more prose. */
+.settings-section-note {
+  color: var(--text-dim);
+}
+
+.settings-section-error {
+  color: var(--delete);
+}
+
 /* Segmented control — generic, works for any number of options */
 
 .seg-control {
@@ -1240,6 +1250,74 @@ html, body {
 
 .data-confirm .data-btn-ghost {
   background: none;
+}
+
+/* ── App lock ─────────────────────────────────────────────────────────────
+   The gate wraps the whole app and contributes no box of its own. While locked
+   the app is inert (nothing focusable, nothing tappable) and unpainted; the
+   lock screen sits over everything, above the rail and dock (30).           */
+
+.gate {
+  display: contents;
+}
+
+.gate-locked {
+  visibility: hidden;
+}
+
+.lock-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: var(--bg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  padding: calc(var(--pad) + env(safe-area-inset-top)) var(--pad)
+           calc(var(--pad) + env(safe-area-inset-bottom));
+  animation: lock-in 0.2s ease;
+}
+
+@keyframes lock-in {
+  from { opacity: 0; }
+}
+
+.lock-glyph {
+  background: none;
+  border: none;
+  border-radius: 50%;
+  padding: 14px;
+  color: var(--text-muted);
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.lock-glyph:hover, .lock-glyph.busy {
+  color: var(--text-2);
+}
+
+.lock-caption {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  text-align: center;
+}
+
+/* The way out for someone whose screen lock the OS has lost. Anchored to the
+   foot of the screen so it is nowhere near the thing you actually tap. */
+.lock-foot {
+  position: absolute;
+  left: var(--pad);
+  right: var(--pad);
+  bottom: calc(var(--pad) + env(safe-area-inset-bottom));
+  display: flex;
+  justify-content: center;
+}
+
+.lock-foot .data-confirm {
+  width: 100%;
+  max-width: 360px;
 }
 
 /* About card */

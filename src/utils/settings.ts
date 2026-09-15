@@ -1,9 +1,11 @@
 import type { ThemePref } from './theme'
 import type { FeedbackPref } from './feedback'
+import type { LockGrace } from './lock'
 
 const THEME_KEY = 'setting_theme'
 const FEEDBACK_KEY = 'setting_feedback'
 const HAPTICS_KEY = 'setting_haptics'   // the older on/off switch, read once below
+const LOCK_GRACE_KEY = 'setting_lock_grace'
 
 export function getSavedTheme(): ThemePref {
   const v = localStorage.getItem(THEME_KEY)
@@ -26,4 +28,15 @@ export function getSavedFeedback(): FeedbackPref {
 
 export function saveFeedback(pref: FeedbackPref): void {
   localStorage.setItem(FEEDBACK_KEY, pref)
+}
+
+/** How long the app may sit in the background before it locks again. Read
+ *  at the moment it matters (see LockGate), never cached. */
+export function getSavedLockGrace(): LockGrace {
+  const v = localStorage.getItem(LOCK_GRACE_KEY)
+  return v === 'now' || v === '1m' || v === '5m' ? v : '1m'
+}
+
+export function saveLockGrace(pref: LockGrace): void {
+  localStorage.setItem(LOCK_GRACE_KEY, pref)
 }

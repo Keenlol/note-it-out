@@ -2,6 +2,7 @@ import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
 import './index.css'
 import { App } from './App'
+import { LockGate } from './components/LockGate'
 import { getSavedTheme } from './utils/settings'
 import { migrateMoodScale } from './utils/storage'
 import { applyTheme, resolveTheme } from './utils/theme'
@@ -20,6 +21,8 @@ migrateMoodScale()
 
 createRoot(document.getElementById('app')!).render(
   <StrictMode>
-    <App />
+    <LockGate>
+      <App />
+    </LockGate>
   </StrictMode>
 )
