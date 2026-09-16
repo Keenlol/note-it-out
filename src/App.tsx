@@ -367,7 +367,7 @@ export function App() {
 
   return (
     <div
-      className={`app${anySheetOpen ? ' sheet-open' : ''}`}
+      className="app"
       // The day's colour, for anything written that day — the tags in the note
       // read it (see .tag in index.css). Absent when no mood is set, which is
       // what makes tags fall back to --accent.
