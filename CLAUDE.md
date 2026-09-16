@@ -204,26 +204,33 @@ meant for the caret.
 
 ### The thumb's glow
 
-`.mood-glow` (in `MoodSlider.tsx`) is a wash of the thumb's colour bleeding in
-from the right edge, centred on the thumb — the page lit by the day's weather.
-It shares the thumb's states and rates (spring at rest, no easing under the
+`.mood-glow` (in `MoodSlider.tsx`) is light leaking in at the **right edge of
+the screen**, level with the thumb — an edge light, hot at the edge and gone
+within a hand's width (`--glow-rx` 120px), not a wash across the note. It
+shares the thumb's states and rates (spring at rest, no easing under the
 finger, the blended colour mid-drag, out first when the clear gesture arms) and
-is positioned in the rail's own terms (`--rail-top + --rail-h × --glow-at`), so
-it lands on the thumb without measuring. It paints at `z-index: -1` inside
-`.app`'s own stacking context (`isolation: isolate` — without that, body's
-background covers it), under the note and over the page colour.
+is positioned in the rail's own terms (`--content-top + --rail-top + --rail-h ×
+--glow-at`), so it lands on the thumb without measuring. It paints at
+`z-index: -1` inside `.app`'s own stacking context (`isolation: isolate` —
+without that, body's background covers it), under the note and over the page.
+
+It runs the full height of the screen so the top band's light isn't cut off at
+the graph's foot; beside the graph it is confined to the gutter right of the
+grid (`--pad` wide, eased in over `--glow-fade`) via two added mask layers, so
+the heatmap's empty cells don't fill with light. **`.rail-veil` is only shown
+while a panel is open** (`.app.sheet-open`, with a delay on the way out equal to
+the panel's slide) — at rest it would paint page colour over exactly the
+glow's hottest strip.
 
 Four gradient rules keep it a glow and not a smear, and any new gradient in the
-app should follow them: **eased stops** (`(1 − t)²`, eleven of them — a
+app should follow them: **eased stops** (`(1 − t)^2.6`, eleven of them — a
 two-stop gradient has a visible edge), **fade to the colour's own transparent**
 via `color-mix(... transparent)` (plain `transparent` is transparent *black* and
 muddies the tail), **mix in OKLCH** so half-alpha stops keep their hue, and
 **grain** — a tiled SVG noise mask dithering alpha over 0.7–1.0, because a
 ramp this shallow spans more pixels than 8 bits have steps and otherwise rings.
-The clip fades the top edge over `--glow-fade` rather than cutting it, so no
-light shows through the heatmap's empty cells. `--glow-peak` is the one knob
-(0.34 light, 0.48 dark — the cool half of the ramp is dark on dark and needs
-laying on thicker).
+`--glow-peak` is the one knob (0.55 light, 0.75 dark — the cool half of the
+ramp is dark on dark and needs laying on thicker).
 
 ### Motion
 
@@ -310,8 +317,8 @@ Panel content is inset on the right by `--rail-gutter` (`--rail-cx` plus half a
 dock button, i.e. where the controls reach), so no row runs under the buttons.
 `.rail-veil` fills that gutter with a left-fading wash of `--bg` at `z-index: 25`
 — between the panel and the controls — so a panel appears to come *out from
-under* the rail rather than to travel behind it. It is `--bg` on `--bg` over a
-strip nothing else paints in, so it changes nothing when the app is at rest.
+under* the rail rather than to travel behind it. It is only visible while a
+panel is open (see the glow, above): at rest it would cover the mood glow.
 Panels are mutually exclusive.
 
 **Panels are not resizable and have no stored height.** They fill from

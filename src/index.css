@@ -535,32 +535,32 @@ html, body {
 }
 
 /* ── The thumb's glow ─────────────────────────────────────────────────────
-   A wash of the mood colour bleeding in from the right edge, centred on the
-   thumb: the page lit by the day's weather. It moves with the thumb (same
-   spring at rest, no easing under the finger) and takes the thumb's colour,
-   including the blended one mid-drag.
+   Light leaking in at the right edge of the screen, level with the thumb: the
+   page lit by the day's weather. It moves with the thumb (same spring at rest,
+   no easing under the finger) and takes the thumb's colour, including the
+   blended one mid-drag. It is an *edge* light — hot at the screen edge, gone
+   within a hand's width — not a wash across the note.
 
-   Three gradient rules keep it a glow rather than a smear:
+   Four gradient rules keep it a glow rather than a smear:
 
    1. Eased falloff. A two-stop gradient has a visible edge where its slope
-      changes (a Mach band). These stops follow (1 − t)² — steep at the source,
-      flat at the rim, so the light dies out with no line to see.
+      changes (a Mach band). These stops follow (1 − t)^2.6 — steep at the
+      source, flat at the rim, so the light dies out with no line to see.
    2. Every stop is the colour itself at a lower alpha, via colour-mix with
       transparent. Never plain `transparent`: that is transparent *black*, and
       a warm amber would fade through mud on its way out.
    3. The mix happens in OKLCH so the half-alpha stops keep their hue and
       chroma instead of sagging toward grey.
-
    4. Grain. A ramp this shallow spans more pixels than an 8-bit channel has
       steps, and the steps show as rings. The glow's alpha is dithered by a
       fine noise mask (0.7–1.0, fractal, tiled) so no two neighbouring pixels
       round the same way; it also gives the light a little paper tooth.
 
-   The clip fades the glow out over its top edge rather than cutting it: the
-   heatmap's empty cells are outlines, and light showing through them would
-   read as a fourth cell state. The fade is the same eased-edge idea applied
-   to the boundary. --glow-peak is the one knob: how much of the page the light
-   is allowed to tint. */
+   The light runs the full height of the screen, so the top band's glow is not
+   cut off at the graph's foot. Beside the graph it is confined to the gutter
+   to the right of the grid (--pad wide), eased in over --glow-fade, so the
+   heatmap's empty cells — outlines only — don't fill with light and read as a
+   fourth cell state. --glow-peak is the one knob: how hot the edge gets. */
 
 @property --glow {
   syntax: '<color>';
@@ -569,10 +569,10 @@ html, body {
 }
 
 :root {
-  --glow-w: 260px;         /* how far in from the right edge the wash reaches */
-  --glow-ry: 210px;        /* half its height */
-  --glow-peak: 0.34;
-  --glow-fade: 72px;       /* eased out over this much at the graph's foot */
+  --glow-rx: 120px;        /* how far in from the screen edge the light reaches */
+  --glow-ry: 150px;        /* half its height */
+  --glow-peak: 0.55;
+  --glow-fade: 40px;       /* eased edge where the light meets the graph */
   /* The dither: black at alpha 0.7–1.0, per pixel. feColorMatrix's last row
      is the alpha out — 0.3 × red channel of the noise + 0.7. */
   --glow-grain: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0.3 0 0 0 0.7'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
@@ -581,21 +581,41 @@ html, body {
 :root[data-theme='dark'] {
   /* Higher, not lower: the cool half of the ramp is dark on dark, and the
      colour has to be laid on thicker before it reads as light at all. */
-  --glow-peak: 0.48;
+  --glow-peak: 0.75;
 }
 
+/* Two mask layers, added: below the graph's foot, everything; beside the
+   graph, only the gutter to the right of the grid, fading out leftward. The
+   upper layer overhangs the seam by --glow-fade and the lower one fades in
+   over the same distance, so where they meet there is no line — inside the
+   gutter both are solid, outside it the lower layer's fade is the only edge. */
 .mood-glow-clip {
   position: fixed;
-  top: var(--content-top, 190px);
-  right: 0;
-  bottom: 0;
-  width: var(--glow-w);
+  inset: 0 0 0 auto;
+  width: calc(var(--glow-rx) + var(--pad));
   overflow: hidden;
   pointer-events: none;
   /* Below the flow — under the note and the graph, over the page colour. */
   z-index: -1;
-  -webkit-mask-image: linear-gradient(to bottom, transparent, #000 var(--glow-fade));
-  mask-image: linear-gradient(to bottom, transparent, #000 var(--glow-fade));
+  --glow-above: var(--content-top, 190px);
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 var(--glow-fade)),
+    linear-gradient(to left, #000 var(--pad), transparent calc(var(--pad) + var(--glow-fade)));
+  -webkit-mask-size:
+    100% calc(100% - var(--glow-above)),
+    100% calc(var(--glow-above) + var(--glow-fade));
+  -webkit-mask-position: bottom, top;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-composite: source-over;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 var(--glow-fade)),
+    linear-gradient(to left, #000 var(--pad), transparent calc(var(--pad) + var(--glow-fade)));
+  mask-size:
+    100% calc(100% - var(--glow-above)),
+    100% calc(var(--glow-above) + var(--glow-fade));
+  mask-position: bottom, top;
+  mask-repeat: no-repeat;
+  mask-composite: add;
 }
 
 .mood-glow {
@@ -605,20 +625,22 @@ html, body {
   height: calc(2 * var(--glow-ry));
   /* Where the thumb is, in the rail's own terms: the rail starts --rail-top
      below the graph and the thumb sits --glow-at of the way down it. */
-  top: calc(var(--rail-top) + var(--rail-h) * var(--glow-at, 0.5));
+  top: calc(var(--content-top, 190px) + var(--rail-top) + var(--rail-h) * var(--glow-at, 0.5));
   transform: translateY(-50%);
+  /* Anchored on the screen edge itself, not the rail: it is light coming in
+     from outside the frame, and the rail stands in it. */
   background: radial-gradient(
-    ellipse var(--glow-w) var(--glow-ry) at calc(100% - var(--rail-cx)) 50%,
+    ellipse var(--glow-rx) var(--glow-ry) at 100% 50%,
     color-mix(in oklch, var(--glow) 100%, transparent) 0%,
-    color-mix(in oklch, var(--glow) 81%, transparent) 10%,
-    color-mix(in oklch, var(--glow) 64%, transparent) 20%,
-    color-mix(in oklch, var(--glow) 49%, transparent) 30%,
-    color-mix(in oklch, var(--glow) 36%, transparent) 40%,
-    color-mix(in oklch, var(--glow) 25%, transparent) 50%,
-    color-mix(in oklch, var(--glow) 16%, transparent) 60%,
-    color-mix(in oklch, var(--glow) 9%, transparent) 70%,
-    color-mix(in oklch, var(--glow) 4%, transparent) 80%,
-    color-mix(in oklch, var(--glow) 1%, transparent) 90%,
+    color-mix(in oklch, var(--glow) 76%, transparent) 10%,
+    color-mix(in oklch, var(--glow) 56%, transparent) 20%,
+    color-mix(in oklch, var(--glow) 39.6%, transparent) 30%,
+    color-mix(in oklch, var(--glow) 26.5%, transparent) 40%,
+    color-mix(in oklch, var(--glow) 16.5%, transparent) 50%,
+    color-mix(in oklch, var(--glow) 9.2%, transparent) 60%,
+    color-mix(in oklch, var(--glow) 4.4%, transparent) 70%,
+    color-mix(in oklch, var(--glow) 1.5%, transparent) 80%,
+    color-mix(in oklch, var(--glow) 0.3%, transparent) 90%,
     color-mix(in oklch, var(--glow) 0%, transparent) 100%
   );
   -webkit-mask-image: var(--glow-grain);
@@ -876,9 +898,13 @@ html, body {
 /* A wash of the page colour down the control column, between a panel (20) and
    the rail (30). A panel slides in *under* the controls, and without this its
    leading edge would be seen travelling behind them; with it, the panel appears
-   to come out from under the rail instead of past it. It is --bg on --bg and
-   covers nothing — panel content stops at --rail-gutter and the note's text
-   stops short of that — so it is invisible except while something is moving. */
+   to come out from under the rail instead of past it.
+
+   It is only there while a panel is: at rest it would sit on top of the mood
+   glow, whose hottest strip is exactly this gutter, and put page colour over
+   it. So it comes up the instant a panel opens (the panel is already moving
+   under it) and goes after the panel has finished leaving — the delay is the
+   panel's own transition time. */
 .rail-veil {
   position: fixed;
   top: var(--content-top, 190px);
@@ -888,6 +914,13 @@ html, body {
   z-index: 25;
   pointer-events: none;
   background: linear-gradient(to left, var(--bg) 45%, transparent);
+  opacity: 0;
+  transition: opacity 0.2s ease 0.32s;
+}
+
+.app.sheet-open .rail-veil {
+  opacity: 1;
+  transition: opacity 0.1s ease;
 }
 
 .sheet {
