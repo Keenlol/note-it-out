@@ -202,6 +202,29 @@ target is a thumb. Keep that split — a thin control does not have to be a thin
 target — but keep the box clear of the note's last character, or it steals taps
 meant for the caret.
 
+### The thumb's glow
+
+`.mood-glow` (in `MoodSlider.tsx`) is a wash of the thumb's colour bleeding in
+from the right edge, centred on the thumb — the page lit by the day's weather.
+It shares the thumb's states and rates (spring at rest, no easing under the
+finger, the blended colour mid-drag, out first when the clear gesture arms) and
+is positioned in the rail's own terms (`--rail-top + --rail-h × --glow-at`), so
+it lands on the thumb without measuring. It paints at `z-index: -1` inside
+`.app`'s own stacking context (`isolation: isolate` — without that, body's
+background covers it), under the note and over the page colour.
+
+Four gradient rules keep it a glow and not a smear, and any new gradient in the
+app should follow them: **eased stops** (`(1 − t)²`, eleven of them — a
+two-stop gradient has a visible edge), **fade to the colour's own transparent**
+via `color-mix(... transparent)` (plain `transparent` is transparent *black* and
+muddies the tail), **mix in OKLCH** so half-alpha stops keep their hue, and
+**grain** — a tiled SVG noise mask dithering alpha over 0.7–1.0, because a
+ramp this shallow spans more pixels than 8 bits have steps and otherwise rings.
+The clip fades the top edge over `--glow-fade` rather than cutting it, so no
+light shows through the heatmap's empty cells. `--glow-peak` is the one knob
+(0.34 light, 0.48 dark — the cool half of the ramp is dark on dark and needs
+laying on thicker).
+
 ### Motion
 
 `--spring` (`cubic-bezier(0.34, 1.56, 0.64, 1)`) overshoots ~10% and settles.

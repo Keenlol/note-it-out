@@ -190,6 +190,19 @@ export function MoodSlider({ value, onChange, feedback = 'vibrate' }: Props) {
       onTouchMove={e => e.stopPropagation()}
       onTouchEnd={e => e.stopPropagation()}
     >
+      {/* The thumb's light on the page: a wash of its colour spreading in from
+          the right edge, centred on wherever the thumb is. It sits *under* the
+          note (z-index below the flow) while the rail sits over it, so the two
+          are separate elements sharing the same states. Position is expressed
+          in the rail's own terms — --rail-top and --rail-h — so it lands on the
+          thumb without measuring anything. */}
+      <div className="mood-glow-clip" aria-hidden="true">
+        <div
+          className={`mood-glow${isSet ? ' set' : ''}${isDragging ? ' dragging' : ''}${clearArmed ? ' clearing' : ''}`}
+          style={{ '--glow': thumbColor, '--glow-at': pct / 100 } as React.CSSProperties}
+        />
+      </div>
+
       <div
         className={`mood-slider${isSet ? ' set' : ''}${isDragging ? ' dragging' : ''}${clearArmed ? ' clearing' : ''}`}
         onPointerDown={onPointerDown}
