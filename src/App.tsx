@@ -10,6 +10,7 @@ import {
 } from './utils/storage'
 import { activeTagFragment, lineIndexAt } from './utils/parser'
 import { moodColor } from './utils/mood'
+import { quoteForDay } from './utils/quotes'
 import { tagFrequency } from './utils/tags'
 import { formatDisplayDate } from './utils/format'
 import { weekOffsetForDate } from './utils/window'
@@ -122,6 +123,22 @@ export function App() {
     clearTimeout(flashTimer.current)
     clearTimeout(versionTimer.current)
   }, [])
+
+  // ── The day's line ──────────────────────────────────────────────────────
+  // Which pool it comes from is the mood's doing (see utils/quotes.ts), so it
+  // follows the rail — but not *during* the gesture. A drag from one end to the
+  // other crosses both band edges, and swapping the text at each one turns a
+  // single gesture into a flicker. So it holds while the finger is down and
+  // lands with the thumb, for the same reason the thumb itself doesn't snap
+  // mid-drag. Everything else that moves the mood — a tap, the keyboard, a
+  // swipe to another day — reads straight through.
+  const [railDown, setRailDown] = useState(false)
+  const [quote, setQuote] = useState<string | null>(null)
+
+  useEffect(() => {
+    if (railDown) return
+    setQuote(quoteForDay(currentDate, mood))
+  }, [currentDate, mood, railDown])
 
   // ── Loading the viewed day ──────────────────────────────────────────────
   useEffect(() => {
@@ -405,6 +422,14 @@ export function App() {
           </div>
 
           <div className="note-fade" style={{ opacity: noteOpacity }}>
+            {/* Between the date and the note, and only once the day has a
+                mood — an unrated day gets nothing, the same way a blank day
+                gets no colour. Keyed on the text so a new line fades in
+                rather than swapping in place. */}
+            {quote && (
+              <p className="day-quote" key={quote}>{quote}</p>
+            )}
+
             <Editor
               value={text}
               onChange={handleTextChange}
@@ -424,6 +449,7 @@ export function App() {
           value={mood}
           onChange={handleMoodChange}
           feedback={feedback}
+          onDraggingChange={setRailDown}
         />
       </div>
 
