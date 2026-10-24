@@ -1,149 +1,200 @@
-# Quote pools — research
+# Quote pools — research, round 2
 
-Candidate pool for the end-of-day line that appears once a mood is set.
-**Nothing here is written by me.** Every line was pulled from a primary text
-(Project Gutenberg) or from a Wikiquote entry that carries a citation, and each
-entry below records where it came from. Lines whose attribution I could *not*
-stand behind are listed at the bottom under "Rejected" rather than quietly
-included.
+Round 1 collected 77 cited quotes. Round 2 tested them and they mostly failed.
+This file is the revision: what survived, what replaced it, and the voice rules
+the testing produced.
 
-## How the pools are cut
+## The test
 
-The scale has seven steps, so two pools leave `okay` (3) stranded — it would
-have to borrow either a consolation or a celebration, and both are wrong for a
-flat day. Three pools, one per arm of the mood ramp plus the neutral:
+Three raters, each given one pool as a bare numbered list — no knowledge of this
+app, its design doctrine, which lines I favoured, or each other. Each was put in
+the matching mood (a grinding bad day / a flat nothing day / a clean good day),
+at 11pm, phone in bed, and asked one question per line: *does this land?*
+1–5, hard marking.
 
-| Pool | Mood steps | Register |
-|--------|------------|----------|
-| `rough` | 0–2 · bleak, rough, low | company, not cheer. Endurance, permission, "this is survivable" |
-| `level` | 3 · okay | the ordinary day. Attention, enough, the value of a plain day |
-| `bright` | 4–6 · good, great, bright | savouring. Delight, gratitude, noticing |
+**Result: 16 of 77 scored 4 or better.** The dominant score was 2.
 
-One thing worth saying before you pick: the app's first principle is that a bad
-day is not a failure. A quote on a bleak day can very easily read as the app
-telling you to cheer up, which is exactly the framing the mood axis was built to
-avoid. So the `rough` pool deliberately contains **no exhortation** — no "push
-through", no "winners never quit". It's all either company (someone else has
-been here) or permission (you don't have to fix this today). If you want
-pep-talk energy anywhere, it belongs in `bright`, where the day can carry it.
+| Pool | Scored 5 | Scored 4 | 3 | 1–2 |
+|------|---------|---------|---|-----|
+| `rough` (30) | 2 | 4 | 6 | 18 |
+| `level` (21) | 1 | 3 | 4 | 13 |
+| `bright` (26) | 3 | 3 | 6 | 14 |
 
----
+Your instinct was right, and the failure was narrower than "too old". Three
+raters who never saw each other's work produced nearly the same list of causes:
 
-## Pool: `rough` — mood 0–2
+1. **Imperatives die.** Every line that gave the reader a job scored 1–2 —
+   *Simplify*, *Pay attention*, *Be astonished*, *Develop courage*, *wish them to
+   happen*. Permission scored 5. "You do not have to be good" was a 5 on a bad
+   day; "Instructions for living a life: Pay attention. Be astonished." — the most
+   famous Oliver line, which I had featured — was a **1**, called "a tote-bag
+   quote" and "a checklist I failed."
+2. **Anything needing a second pass is dead on arrival**, regardless of author.
+   Everything scoring 4+ was one sentence read once. Inverted classical syntax
+   ("Nothing happens to anybody which he is not fitted by nature to bear") lost
+   on diction alone, before its content was even weighed.
+3. **"Attitude is a choice" reads as blame.** Frankl's freedom-to-choose line,
+   Aurelius's "fitted by nature to bear", Keller's "mastery of hardships" — all
+   scored 1, all for the same reason: they locate a bad day in the reader's
+   character. The `rough` rater: *"it contradicts the product."* That's the
+   sharpest confirmation that the doctrine in CLAUDE.md is load-bearing, found by
+   someone who had never read it.
+4. **The famous ones have become decor.** "Fail better", "invincible summer",
+   "thing with feathers" all scored 2 — overexposure hollowed them out. *"I read
+   the object they're printed on, not the sentence."*
+5. **Don't make the day the unit of account.** Nearly every `level` failure did:
+   *the quality of the day*, *how we spend our days*, *every day is the best day*,
+   *nothing is worth more than this day*. On a flat day, pointing at the day
+   either accuses or sounds false. What worked instead widened the frame past
+   today, or granted permission to be unremarkable.
+6. **Hedges and jokes buy sincerity.** "More or less kills me with delight" and
+   "Also in mischief" scored high *because* of the wink. Unhedged uplift ("You are
+   a miracle") scored 1 — *"the voice of a wellness app that's about to upsell
+   me."*
+7. **Memento mori is a knife edge.** "Today was good and won't come again" = 4.
+   "You will die having merely visited this world" = 2. Mild melancholy about a
+   day *ending* is fine; mortality is not.
 
-1. "Ever tried. Ever failed. No matter. Try again. Fail again. Fail better." — Samuel Beckett, *Worstward Ho* (1983)
-2. "You must go on, I can't go on, I'll go on." — Samuel Beckett, *The Unnamable* (1953)
-3. "In the depths of winter, I finally learned that within me there lay an invincible summer." — Albert Camus, "Return to Tipasa" (1952)
-4. "There is not love of life without despair about life." — Albert Camus, preface to *Lyrical and Critical Essays* (1970)
-5. "The best way out is always through." — Robert Frost, "A Servant to Servants" (1914)
-6. "The world breaks everyone and afterward many are strong at the broken places." — Ernest Hemingway, *A Farewell to Arms* (1929)
-7. "Now is no time to think of what you do not have. Think of what you can do with what there is." — Ernest Hemingway, *The Old Man and the Sea* (1952)
-8. "We are healed of a suffering only by experiencing it to the full." — Marcel Proust, *In Search of Lost Time*, "Grief and Oblivion"
-9. "Be patient toward all that is unsolved in your heart. … Live the questions now." — Rainer Maria Rilke, *Letters to a Young Poet*, Letter Four (16 July 1903)
-10. "Someone I loved once gave me a box full of darkness. It took me years to understand that this, too, was a gift." — Mary Oliver, "The Uses of Sorrow"
-11. "You want to cry aloud for your mistakes. But to tell the truth the world doesn't need any more of that sound." — Mary Oliver, "The Poet With His Face in His Hands"
-12. "You do not have to be good. … You only have to let the soft animal of your body love what it loves." — Mary Oliver, "Wild Geese"
-13. "Not everything that is faced can be changed; but nothing can be changed until it is faced." — James Baldwin, "As Much Truth As One Can Bear", *New York Times Book Review* (14 January 1962)
-14. "Nothing is so much to be feared as fear." — Henry David Thoreau, *Journal* (7 September 1851)
-15. "Although the world is full of suffering, it is full also of the overcoming of it." — Helen Keller, *Optimism* (1903)
-16. "I would rather walk with a friend in the dark than walk alone in the light." — Helen Keller
-17. "Where there's hope, there's life. It fills us with fresh courage and makes us strong again." — Anne Frank, *The Diary of a Young Girl*
-18. "No one has ever become poor by giving." — Anne Frank, "Give!" (26 March 1944)
-19. "Everything can be taken from a man but one thing: the last of the human freedoms — to choose one's attitude in any given set of circumstances." — Viktor Frankl, *Man's Search for Meaning* (1946)
-20. "Nothing happens to anybody which he is not fitted by nature to bear." — Marcus Aurelius, *Meditations* V, 18
-21. "All that happens is as usual and familiar as the rose in spring and the crop in summer." — Marcus Aurelius, *Meditations* IV, 44
-22. "Look within; within is the fountain of all good." — Marcus Aurelius, *Meditations* VII, 59
-23. "Demand not that events should happen as you wish; but wish them to happen as they do happen, and you will go on well." — Epictetus, *Enchiridion* 8
-24. "The word must be heard in silence; there must be darkness to see the stars." — Ursula K. Le Guin, *The Farthest Shore* (1972)
-25. "It is light that defeats the dark." — Ursula K. Le Guin, *A Wizard of Earthsea* (1968)
-26. "You may not control all the events that happen to you, but you can decide not to be reduced by them." — Maya Angelou, *Letter to My Daughter* (2008)
-27. "'Hope' is the thing with feathers — / That perches in the soul — / And sings the tune without the words — / And never stops — at all." — Emily Dickinson
-28. "Perseverance is not a long race; it is many short races one after another." — Walter Elliott, *The Spiritual Life* (1918)
-29. "The experience of a sad and tender heart is what gives birth to fearlessness." — Pema Chödrön ⚠︎ *quoted on Wikiquote without a book citation — find the source before shipping*
-30. "A happy life consists not in the absence, but in the mastery of hardships." — Helen Keller ⚠︎ *widely quoted, no citation found; verify against* Optimism *before shipping*
+## Survivors from round 1 — scored 4 or 5
 
-## Pool: `level` — mood 3
+### `rough`
+1. "You must go on, I can't go on, I'll go on." — Samuel Beckett, *The Unnamable* (1953) — **5**
+2. "You do not have to be good. … You only have to let the soft animal of your body love what it loves." — Mary Oliver, "Wild Geese" — **5**
+3. "The best way out is always through." — Robert Frost, "A Servant to Servants" (1914) — **4**
+4. "The world breaks everyone and afterward many are strong at the broken places." — Ernest Hemingway, *A Farewell to Arms* (1929) — **4**
+5. "Now is no time to think of what you do not have. Think of what you can do with what there is." — Ernest Hemingway, *The Old Man and the Sea* (1952) — **4**
+6. "Not everything that is faced can be changed; but nothing can be changed until it is faced." — James Baldwin, *NYT Book Review* (14 January 1962) — **4**
 
-1. "To affect the quality of the day, that is the highest of arts." — Henry David Thoreau, *Walden*, "Where I Lived, and What I Lived For"
-2. "Morning is when I am awake and there is a dawn in me." — Henry David Thoreau, *Walden*
-3. "Simplify, simplify." — Henry David Thoreau, *Walden*
-4. "How we spend our days is, of course, how we spend our lives." — Annie Dillard, *The Writing Life* (1989)
-5. "The years teach much which the days never know." — Ralph Waldo Emerson, "Experience"
-6. "Write it on your heart that every day is the best day in the year." — Ralph Waldo Emerson, "Works and Days"
-7. "He who knows that enough is enough will always have enough." — Laozi, *Tao Te Ching* 46
-8. "Very little is needed to make a happy life." — Marcus Aurelius, *Meditations* VII, 67
-9. "To live your brief life rightly, isn't that enough?" — Marcus Aurelius, *Meditations* X, 31 (Hays translation)
-10. "I exist as I am, that is enough." — Walt Whitman, "Song of Myself" § 20
-11. "It takes time to live. Like any work of art, life needs to be thought about." — Albert Camus
-12. "Listen. Are you breathing just a little and calling it a life?" — Mary Oliver, "Have You Ever Tried to Enter the Long Black Branches?"
-13. "Instructions for living a life: Pay attention. Be astonished. Tell about it." — Mary Oliver, "Sometimes"
-14. "Keep some room in your heart for the unimaginable." — Mary Oliver, "Evidence"
-15. "The present moment contains past and future. The secret of transformation is in the way we handle this very moment." — Thich Nhat Hanh, *Understanding Our Mind* (2006)
-16. "We have more possibilities available in each moment than we realize." — Thich Nhat Hanh
-17. "Happiness, too, is a long patience." — Albert Camus
-18. "Nothing is worth more than this day." — Johann Wolfgang von Goethe
-19. "This very moment is the perfect teacher, and, lucky for us, it's with us wherever we are." — Pema Chödrön ⚠︎ *no citation on Wikiquote*
-20. "We can't control what's going to happen but we can grow in awareness of what is happening." — Pema Chödrön ⚠︎ *no citation on Wikiquote*
-21. "To attain knowledge, add things every day. To attain wisdom, remove things every day." — Laozi ⚠︎ *circulates widely; I did not match it to a numbered chapter*
+### `level`
+7. "I exist as I am, that is enough." — Walt Whitman, "Song of Myself" § 20 — **5**
+8. "The years teach much which the days never know." — Ralph Waldo Emerson, "Experience" — **4**
+9. "Happiness, too, is a long patience." — Albert Camus — **4**
+10. "Keep some room in your heart for the unimaginable." — Mary Oliver, "Evidence" — **4**
 
-## Pool: `bright` — mood 4–6
+### `bright`
+11. "Be joyful though you have considered all the facts." — Wendell Berry, "Manifesto: The Mad Farmer Liberation Front" (1970) — **5**
+12. "Every day I see or hear something that more or less kills me with delight." — Mary Oliver, "Mindful" — **5**
+13. "This is a wonderful day. I've never seen this one before." — Maya Angelou (17 May 2013) — **5**
+14. "I believe in kindness. Also in mischief. Also in singing, especially when singing is not necessarily prescribed." — Mary Oliver, "Evidence" — **4**
+15. "That it will never come again / Is what makes life so sweet." — Emily Dickinson — **4**
+16. "Autumn is a second Spring when every leaf is a flower." — Albert Camus — **4** ⚠︎ *secondary source only*
 
-1. "Be joyful though you have considered all the facts." — Wendell Berry, "Manifesto: The Mad Farmer Liberation Front", *Farming: A Hand Book* (1970)
-2. "Every day I see or hear something that more or less kills me with delight." — Mary Oliver, "Mindful"
-3. "My work is loving the world." — Mary Oliver, "Messenger"
-4. "Light is an invitation to happiness, and that happiness, when it's done right, is a kind of holiness." — Mary Oliver, "Poppies"
-5. "Still, what I want in my life is to be willing to be dazzled." — Mary Oliver, "The Ponds"
-6. "I don't want to end up simply having visited this world." — Mary Oliver, "When Death Comes"
-7. "I believe in kindness. Also in mischief. Also in singing, especially when singing is not necessarily prescribed." — Mary Oliver, "Evidence"
-8. "This a wonderful day. I've never seen this one before." — Maya Angelou (17 May 2013)
-9. "Earth laughs in flowers." — Ralph Waldo Emerson, "Hamatreya"
-10. "The sun shines not on us but in us." — John Muir, journal (1872)
-11. "That it will never come again / Is what makes life so sweet." — Emily Dickinson
-12. "If I can stop one heart from breaking, I shall not live in vain." — Emily Dickinson
-13. "Gratitude is not only the greatest of virtues, but the parent of all others." — Cicero
-14. "To be glad of life, because it gives you the chance to love and to work and to play and to look up at the stars." — Henry van Dyke, "Footpaths to Peace"
-15. "Know the joy of life by piling good deed on good deed until no rift or cranny appears between them." — Marcus Aurelius, *Meditations* XII, 29
-16. "It's wonderful to be alive and to walk on earth." — Thich Nhat Hanh, talk at Stonehill College (2002)
-17. "You are a miracle, and everything you touch could be a miracle." — Thich Nhat Hanh
-18. "Freedom from suffering is a great happiness." — Thich Nhat Hanh, *Old Path White Clouds* (1991)
-19. "Maman used to say that you can always find something to be happy about." — Albert Camus, *The Stranger* (1942)
-20. "Optimism is the faith that leads to achievement; nothing can be done without hope." — Helen Keller, *Optimism* (1903)
-21. "Go to the edge of the cliff and jump off. Build your wings on the way down." — Ray Bradbury, *Brown Daily Herald* (24 March 1995)
-22. "Develop enough courage so that you can stand up for yourself and then stand up for somebody else." — Maya Angelou, *Rainbow in the Cloud* (2014)
-23. "Without courage we cannot practice any other virtue with consistency." — Maya Angelou, *USA Today* (5 March 1988)
-24. "Autumn is a second Spring when every leaf is a flower." — Albert Camus ⚠︎ *only ever "as quoted in" a 2004 secondary source; no primary text found*
-25. "Never forget: We are alive within mysteries." — Wendell Berry ⚠︎ *no citation on Wikiquote*
-26. "It all comes to this: the simplest way to be happy is to do good." — Helen Keller ⚠︎ *no citation on Wikiquote*
+## New: the modern tier
 
-**Counts:** 30 `rough` · 21 `level` · 26 `bright` = **77**, of which 69 carry a
-real citation and 8 are flagged ⚠︎.
+Chosen against the seven rules above rather than by reputation — plain modern
+syntax, descriptive not prescriptive, one pass, hedge or joke welcome. Same
+sourcing standard as round 1.
 
----
+### `rough`
+17. "Almost everything will work again if you unplug it for a few minutes, including you." — Anne Lamott (Facebook, 8 April 2015)
+18. "The game of life is hard, and a lot of us are playing hurt." — Anne Lamott
+19. "Lighthouses don't go running all over an island looking for boats to save; they just stand there shining." — Anne Lamott
+20. "And a step backward, after making a wrong turn, is a step in the right direction." — Kurt Vonnegut, *Player Piano* (1952), ch. 32
+21. "You were sick, but now you're well, and there's work to do." — Kurt Vonnegut, Kilgore's Creed, *Timequake* (1997)
+22. "Things are getting worse faster than I can lower my standards." — Carrie Fisher (*The Late Late Show with Craig Ferguson*, 2009)
+23. "Everything makes sense a bit at a time. But when you try to think of it all at once, it comes out wrong." — Terry Pratchett, *Diggers* (1990)
+24. "Hope is optimism with a broken heart." — Nick Cave, *Faith, Hope and Carnage* (2022) ⚠︎ *reviews report the clauses in both orders; check the book*
 
-## Rejected — popular lines that don't survive checking
+### `level`
+25. "We are here on Earth to fart around. Don't let anybody tell you any different." — Kurt Vonnegut, *A Man Without a Country* (2005)
+26. "It is well known that a vital ingredient of success is not knowing that what you're attempting can't be done." — Terry Pratchett
+27. "Find out who you are and do it on purpose." — Dolly Parton
 
-Listed so they don't creep back in later. Every one of these is on the
-front page of a quote site with a confident attribution.
+### `bright`
+28. "If this isn't nice, I don't know what is." — Kurt Vonnegut, "Knowing What's Nice", *In These Times* (2003)
+29. "Laughter is carbonated holiness." — Anne Lamott, *Plan B* (2005)
+30. "We must have the stubbornness to accept our gladness in the ruthless furnace of this world." — Jack Gilbert, "A Brief for the Defense", *Collected Poems* (2012)
+31. "It's hard to be a diamond in a rhinestone world." — Dolly Parton, "Tennessee Homesick Blues" (1984)
+32. "Everything was beautiful and nothing hurt." — Kurt Vonnegut, *Slaughterhouse-Five* (1969)
 
-- "Keep your face always toward the sunshine — and shadows will fall behind you." — credited to both Whitman and Keller; found in neither. *A Dictionary of American Proverbs* (1992) lists it as a US/Canadian proverb.
-- "The wound is the place where the Light enters you." — Rumi. Coleman Barks' loose rendering, not a translation of a located line; no match in the Rumi material I pulled.
-- "What is to give light must endure burning." — Frankl. No match anywhere in the Frankl material.
-- "Success is not final, failure is not fatal: it is the courage to continue that counts." — Churchill. No documented primary source; the International Churchill Society treats it as not his.
-- "Tough times never last, but tough people do." — Robert H. Schuller. Repeated across listings with no source given.
-- "Give a man a fish and you feed him for a day…" — Wikiquote's own note: origin unknown.
-- "We must be willing to let go of the life we planned so as to have the life that is waiting for us." — Joseph Campbell. Contested.
-- "What does not kill me, makes me stronger." — Nietzsche, *Twilight of the Idols*, "Maxims and Arrows" 8. **Correctly attributed**, but cut on grounds of tone: it's the exact pass/fail framing the mood axis avoids.
-- "Never give in, never give in, never, never, never." — Churchill, Harrow School (29 October 1941). **Correctly attributed**, cut for register: a wartime speech is the wrong voice for a journal footer.
-- Anything from the SEO quote-farms (uncommonquotes, the monacor.de network) — largely unattributed aphorisms with no author at all.
+Vonnegut and Lamott are the two biggest wins here. Both write the way the raters
+rewarded: plain, funny, hedged, no instructions. The Vonnegut line in 28 is
+*explicitly* an instruction to notice happiness, and it still works, because the
+hedge ("I don't know what is") does the deflating.
 
-## Sourcing method
+## The internet investigation
 
-- **Primary texts** via Project Gutenberg, grepped for exact wording: *Walden*, *Meditations*, *Enchiridion*, *Leaves of Grass*, Emerson's *Essays* (First and Second Series).
-- **Wikiquote raw wikitext** (`?action=raw`) for ~60 author and theme pages, extracting each quote with the `**` citation line directly beneath it — so the citation in this file is the one Wikiquote holds, not a quote site's guess.
-- Web search was used only to find *candidates*; none of its attributions were taken on trust. The two searches I ran returned mostly SEO quote-farms that copy each other, which is why the method above exists.
+### What I could and couldn't reach — read this before trusting the section
+- **Reddit: unreachable.** Blocked at the fetch layer, blocked in the browser, and all three public mirrors I tried were down (429 / 410 / timeout). I got **nothing** first-hand from Reddit. Anything I'd write about "top r/AskReddit advice" would be laundered through blog listicles, so I didn't.
+- **X: unreachable.** Search redirects to a login wall, and I won't sign into your account.
+- **4chan: fully reachable.** The official JSON API is open and I pulled live `/adv/`, `/fit/`, `/lit/` and `/his/` in full.
 
-## Notes before implementation
+### What 4chan actually yielded
+Honestly: very little, and the reason matters. Live `/adv/` is personal venting,
+relationship drama, gendered flame wars and **active suicide-baiting** — I hit
+several posts of it inside one thread. There is no aphorism layer; the
+"goated advice" reputation lives in *curated screenshots* of posts from years
+ago, not in the board, and the archives that hold those (4plebs, desuarchive)
+403 automated access.
 
-- **Copyright.** Oliver, Le Guin, Berry, Angelou, Thich Nhat Hanh, Frankl, Hemingway and the Camus/Rilke/Proust translations are all in copyright. Short quotations with attribution in a personal, non-commercial app is ordinary quotation practice, but it's your call. The pre-1929 material (Thoreau, Whitman, Dickinson, Emerson, Muir, Keller, Cicero, Aurelius, Epictetus, Laozi, van Dyke) is public domain and carries no question at all — if you want to be conservative, those alone are 31 lines.
-- **Attribution in the UI.** These need the author's name shown. An unattributed quote reads as the app's own voice telling you how to feel, which is worse than no quote.
-- **Length.** They run 20–180 characters. The long ones (Rilke, van Dyke, Frankl) will need either truncation at a sensible clause or exclusion, depending on how much room the footer gets.
+The one real seam is **`/fit/`'s weekly `/sig/` (self-improvement general)
+thread**, which is a genuine, recurring, non-ironic encouragement thread. From
+this week's:
+
+33. "You made it through last week, you'll make it through this one as well." — anonymous, 4chan `/fit/` `/sig/` thread
+34. "What matters is that you're here now." — anonymous, 4chan `/fit/`
+35. "Don't feel overwhelmed, you just need to do a little." — anonymous, 4chan `/fit/`
+36. "You don't have to be basic, but you just have to start." — anonymous, 4chan `/fit/`
+37. "We're all gonna make it." — 4chan `/fit/` catchphrase, traced by Know Your Meme to a Zyzz motivational video (earliest dated upload 24 March 2012)
+
+**Three hard caveats, and I'd weigh them heavily.**
+1. **These are unverifiable and already rotting.** Anonymous posts in threads that
+   are pruned within days. Numbers 33–36 will 404 shortly and cannot be cited to
+   a person. Round 1's standard was "every line has a source"; these do not meet
+   it, and I'm not going to pretend otherwise.
+2. **The register is the opposite of the ones that scored 5.** 33–36 are all
+   second-person encouragement — the precise thing all three raters punished.
+   They *read* modern, but structurally they're pep talk.
+3. **Shipping a line credited to 4chan is a reputational decision, not a
+   sourcing one.** And an unattributed one becomes the app's own voice, which the
+   round-1 note already warns against.
+
+My recommendation: take 37 or leave it (it's genuinely documented and genuinely
+beloved), and drop 33–36. The useful thing 4chan gave this project is not
+quotes — it's confirmation that the plain, deflated, we're-all-in-it register
+works, which the modern tier already delivers with real citations behind it.
+
+### Canonical internet lines, checked
+- **"You can just do things."** — the 2024 meme. Origin **unresolved**: an obscure 2018 tweet predates it with no traction; Jay Yang and Pieter Levels have the strongest claims; the Sam Altman attribution has no primary source. Usable only as an unattributed internet aphorism.
+- **"Comparison is the thief of joy."** — **not Roosevelt.** Quote Investigator finds no evidence for Roosevelt, Twain or Lewis; the earliest close match is John Powell, *Happiness Is an Inside Job* (1989), and Roosevelt's name was first attached in 2012, 93 years after his death.
+- **"Be curious, not judgmental."** — **not Whitman**, despite the Ted Lasso scene saying so. Wikiquote: no source at all; the nearest thing in *Leaves of Grass* is "Be not curious about God."
+
+## Rejected
+
+Round 1's list, plus everything the raters killed. Kept so none of it creeps back.
+
+**Killed by the raters — cut entirely:**
+- Mary Oliver, "the world doesn't need any more of that sound" — *shames the user at the exact moment they're using the app to express something hard.* Worst-scoring line in the whole set.
+- Mary Oliver, "Instructions for living a life: Pay attention. Be astonished." — scored 1. A checklist.
+- Mary Oliver, "Listen. Are you breathing just a little and calling it a life?" — scored 1. An accusation with a finger in the chest.
+- Mary Oliver, "I don't want to end up simply having visited this world" — mortality audit on a good day.
+- Mary Oliver, "box full of darkness … this, too, was a gift" — not bad, but timing-dependent: *"a five if you're two years out and a one if you're four hours out."* The app can't know which.
+- Viktor Frankl, "choose one's attitude"; Marcus Aurelius, "fitted by nature to bear"; Helen Keller, "mastery of hardships"; Epictetus, "wish them to happen as they do happen"; Marcus Aurelius, "within is the fountain of all good" — all blame the reader or instruct them to want their bad day.
+- Annie Dillard, "How we spend our days is, of course, how we spend our lives" — scored 1; *"so this is your life, then,"* and the "of course" adds smugness.
+- Emerson, "every day is the best day in the year" — scored 1. Demands a feeling the reader doesn't have.
+- Thich Nhat Hanh, "You are a miracle"; Cicero on gratitude; Marcus Aurelius "good deed on good deed"; Dickinson "not live in vain"; Keller "optimism/achievement" — saccharine, moralising, or productivity ideology.
+
+**Misattributions (round 1, unchanged):** "Keep your face always toward the sunshine" (proverb, not Whitman or Keller) · "The wound is the place where the Light enters you" (Barks' rendering, not a locatable Rumi line) · "What is to give light must endure burning" (not found in Frankl) · "Success is not final, failure is not fatal" (not documented Churchill) · "Tough times never last" (Schuller, unsourced) · "Give a man a fish" (origin unknown per Wikiquote) · "We must be willing to let go of the life we planned" (Campbell, contested).
+
+**Correctly attributed, cut on tone:** Nietzsche, "what does not kill me makes me stronger" (*Twilight of the Idols*) — the pass/fail framing the mood axis exists to avoid · Churchill, "never give in" (Harrow, 1941) — a wartime speech is the wrong voice for a journal footer.
+
+## Where the pool stands
+
+**32 cited lines** (16 survivors + 16 modern), plus 5 from 4chan I'd mostly drop.
+That is below round 1's 77 and below the 50 you originally asked for, and I think
+that's the right trade: round 1's 77 contained 16 lines that worked and 61 that
+would have made the app feel like a dentist's waiting room. If you want the count
+back up, the productive direction is more of the modern tier — Vonnegut, Lamott,
+Pratchett, Gilbert, Berry all have far more usable material than I've pulled, and
+they're sourceable. There are also ~16 lines that scored 3 and are available as a
+B-tier if you want volume over hit rate.
+
+## Rules for any line added later
+
+1. No imperative. If it tells the reader to do something, it's out — unless a hedge or joke undercuts it.
+2. One sentence, parseable in one pass, on a phone, at 11pm.
+3. Never imply the mood was a choice, or that the day was a performance.
+4. Don't point at "the day" as a unit — widen the frame or grant permission.
+5. Modern plain syntax. A stiff translation loses before its content is weighed.
+6. If it's on a tote bag, it's spent.
+7. Melancholy about an ending is fine. Mortality is not.
