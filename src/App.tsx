@@ -422,6 +422,14 @@ export function App() {
           </div>
 
           <div className="note-fade" style={{ opacity: noteOpacity }}>
+            {/* Between the date and the note, and only once the day has a
+                mood — an unrated day gets nothing, the same way a blank day
+                gets no colour. Keyed on the text so a new line fades in
+                rather than swapping in place. */}
+            {quote && (
+              <p className="day-quote" key={quote}>{quote}</p>
+            )}
+
             <Editor
               value={text}
               onChange={handleTextChange}
@@ -431,14 +439,6 @@ export function App() {
               placeholder={PLACEHOLDER}
               textareaRef={textareaRef}
             />
-
-            {/* Under the note, and only once the day has a mood — an unrated
-                day gets nothing, the same way a blank day gets no colour.
-                Keyed on the text so a new line fades in rather than swapping
-                in place. */}
-            {quote && (
-              <p className="day-quote" key={quote}>{quote}</p>
-            )}
           </div>
         </div>
 

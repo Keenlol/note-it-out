@@ -214,10 +214,9 @@ html, body {
 .note-fade {
   flex: 1;
   display: flex;
-  /* A column so the day's line can sit under the note and crossfade with it on
+  /* A column so the day's line can sit above the note and crossfade with it on
      a swipe — both belong to the day being viewed, so they turn the page
-     together. The editor still takes the slack, which is what pushes the line
-     to the foot of a short day. */
+     together. The editor still takes the slack below them. */
   flex-direction: column;
   /* The mood row used to sit here and space the note off the date. It doesn't
      any more, so the gap has to be stated. */
@@ -225,9 +224,10 @@ html, body {
   transition: opacity 0.08s ease;
 }
 
-/* The day's line. Set in the reading face, not the UI face — it's something to
-   read, like the entry above it — but a step down in size and weight of voice,
-   because this is the app speaking rather than the day's own text.
+/* The day's line — an epigraph, between the date and the entry it heads. Set in
+   the reading face, not the UI face, because it's something to read like the
+   entry below it, but a step down in size and weight of voice: this is the app
+   speaking, and the day's own text is what the column is for.
    Muted rather than --day-ink deliberately: the mood already speaks through
    *which* line this is, and a whole sentence in the day's colour would double
    the saturated area the ramp is meant to own by itself. Same call that keeps
@@ -235,7 +235,9 @@ html, body {
    One line changes that if it ever should be: colour it --day-ink under
    .app[data-mood], exactly as .tag does. */
 .day-quote {
-  margin: 20px 0 0;
+  /* Sits tight under the date and holds the note off below it. .note-fade
+     already supplies the gap from the title, so only the lower one is stated. */
+  margin: 0 0 18px;
   font-family: var(--editor-font);
   /* Derived from the note's measure, not a new size. */
   font-size: calc(var(--editor-size) * 0.85);
