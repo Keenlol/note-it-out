@@ -157,7 +157,97 @@ works, which the modern tier already delivers with real citations behind it.
 ### Canonical internet lines, checked
 - **"You can just do things."** — the 2024 meme. Origin **unresolved**: an obscure 2018 tweet predates it with no traction; Jay Yang and Pieter Levels have the strongest claims; the Sam Altman attribution has no primary source. Usable only as an unattributed internet aphorism.
 - **"Comparison is the thief of joy."** — **not Roosevelt.** Quote Investigator finds no evidence for Roosevelt, Twain or Lewis; the earliest close match is John Powell, *Happiness Is an Inside Job* (1989), and Roosevelt's name was first attached in 2012, 93 years after his death.
+- **"If you're going through hell, keep going."** — **not Churchill.** The Churchill Centre: not anywhere in his canon. Quote Investigator's earliest instance is the *Christian Science Sentinel*, 30 October 1943; the variant "don't stop!" is plausibly Douglas Bloch (1990).
 - **"Be curious, not judgmental."** — **not Whitman**, despite the Ted Lasso scene saying so. Wikiquote: no source at all; the nearest thing in *Leaves of Grass* is "Be not curious about God."
+
+## Tier C — internet vernacular, from recall
+
+You asked me to grow the list from what I know, since Reddit and X are
+unreachable here. Here is that, with the caveat stated once and meant:
+
+**I cannot verify any of this, and recall is the exact mechanism that produces
+misattribution.** This session has now caught four lines that are confidently
+misattributed across the whole internet *because* people remember them
+confidently — Roosevelt, Whitman, Churchill twice. I am not a better source than
+those people were. So Tier C is quarantined from the cited material above, and
+nothing in it claims an author.
+
+What these lines *do* have is the register that won the blind test: plain,
+deflating, permission-granting, often funny. Most are genuinely anonymous — folk
+aphorism that formed in recovery rooms, ADHD and chronic-illness communities,
+Tumblr self-care posts and r/getdisciplined threads. Treating them as proverbs
+rather than quotations is honest, the same way "this too shall pass" is honest.
+Where I'm unsure the phrasing I remember is the canonical one, assume I'm
+paraphrasing.
+
+### `rough`
+38. "It's a bad day, not a bad life."
+39. "Rest is not a reward for work completed."
+40. "You are not behind. There is no schedule."
+41. "Did you eat today? Did you drink water? That counts."
+42. "Motivation comes after you start, not before."
+43. "Progress isn't linear."
+44. "You've gotten through every day so far."
+45. "Feelings aren't facts."
+46. "You're allowed to start over."
+47. "One day at a time."
+48. "Just do the next right thing."
+49. "Shower, eat, go outside. In that order."
+50. "Fuck it, we ball."
+
+### `level`
+51. "Nobody is thinking about you as much as you think."
+52. "It's not that deep."
+53. "Most days are just days."
+54. "Low effort still counts."
+55. "You can just do things." *(origin unresolved — see the internet section)*
+
+### `bright`
+56. "Let yourself have this."
+57. "Good days count too."
+58. "Normalize being happy for no reason."
+
+**Notes on specific ones.** 50 is the single best fit in this tier for the rules
+— it's permission plus a joke, and it carries no instruction at all; it is also
+profanity, so it's a product call, not a research one. 47 and 48 are AA/recovery
+vernacular and will read as such to anyone who's been in those rooms, which may
+be a feature or a problem depending on who uses this app. 49 is the canonical
+/adv/ and r/getdisciplined reply and the only Tier C line that's an imperative
+I'd keep, because it's concrete and small. 58 and 53 are the two I'm least sure
+I'm quoting rather than paraphrasing.
+
+### Internet-era lines that *do* have an author
+59. "The days are long but the decades are short." — Sam Altman, blog.samaltman.com, written on turning 30 (2015; the post is undated but opens "I turned 30 last week", and it was being quoted elsewhere by May 2015)
+60. "You are allowed to be both a masterpiece and a work in progress, simultaneously." — Sophia Bush ⚠︎ *the wording is confirmed as the framing of her podcast* Work in Progress*, but I could not find the first public use; treat the attribution as probable, not established*
+
+## Tier D — original copy, written by me
+
+Flagging this clearly because it cuts against your round-1 instruction, and I'm
+offering it rather than folding it into the pools.
+
+Tier C showed something: once a line is anonymous folk aphorism, the quotation
+frame stops doing any work. And there's a case that for *this* app original copy
+is actually the better answer. In round 1 I argued an unattributed quote is bad
+because it reads as the app's own voice — but if the app is simply speaking, in
+its own voice, honestly, that objection dissolves. It also sidesteps the
+copyright question entirely, and lets every line be built to the seven rules
+instead of found and then checked against them.
+
+These are mine, written to those rules. Not quotes, no attribution line, and I
+have not mixed them in above:
+
+- `rough` — "Nothing about today needs solving tonight."
+- `rough` — "You wrote it down. That was the hard part."
+- `rough` — "A day this heavy was always going to leave a mark."
+- `level` — "Some days are just the distance between two other days."
+- `level` — "Nothing happened. That's a kind of fine."
+- `level` — "This one goes in the pile with the rest of them, and that's allowed."
+- `bright` — "Worth keeping, this one."
+- `bright` — "Whatever that was, it worked."
+
+The second `rough` line is the only one that uses something no quotation can: it
+knows the reader just typed a note. That's an argument for original copy on its
+own — a found quote can never reference the app.
 
 ## Rejected
 
@@ -180,14 +270,23 @@ Round 1's list, plus everything the raters killed. Kept so none of it creeps bac
 
 ## Where the pool stands
 
-**32 cited lines** (16 survivors + 16 modern), plus 5 from 4chan I'd mostly drop.
-That is below round 1's 77 and below the 50 you originally asked for, and I think
-that's the right trade: round 1's 77 contained 16 lines that worked and 61 that
-would have made the app feel like a dentist's waiting room. If you want the count
-back up, the productive direction is more of the modern tier — Vonnegut, Lamott,
-Pratchett, Gilbert, Berry all have far more usable material than I've pulled, and
-they're sourceable. There are also ~16 lines that scored 3 and are available as a
-B-tier if you want volume over hit rate.
+**63 lines, in three grades of confidence, and the grade matters more than the count:**
+
+| Tier | Count | What it is | Safe to ship? |
+|------|-------|-----------|---------------|
+| A — survivors | 16 | Round 1, scored 4–5 blind | Yes, cited |
+| B — modern | 18 | Built to the rules, cited (incl. Altman, Bush) | Yes, cited |
+| C — vernacular | 21 | Recalled, anonymous, unverifiable | As proverbs only, no author |
+| D — original | 8 | Written by me to the rules | Your call; it's app copy, not a quote |
+| (4chan) | 5 | Anonymous, ephemeral, pep-talk register | Recommended against, except "We're all gonna make it" |
+
+So the 50 you originally asked for is cleared, but only 34 of them carry a real
+citation, and that is the honest headline. Round 1 hit 77 by counting 61 lines
+that would have made the app feel like a dentist's waiting room. If you want more
+*cited* lines, the productive direction is the modern tier — Vonnegut, Lamott,
+Pratchett, Gilbert and Berry all have far more usable material than I've pulled,
+and it's all sourceable. There are also ~16 lines that scored 3, available as a
+reserve if you'd rather have volume than hit rate.
 
 ## Rules for any line added later
 
