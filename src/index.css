@@ -214,10 +214,45 @@ html, body {
 .note-fade {
   flex: 1;
   display: flex;
+  /* A column so the day's line can sit under the note and crossfade with it on
+     a swipe — both belong to the day being viewed, so they turn the page
+     together. The editor still takes the slack, which is what pushes the line
+     to the foot of a short day. */
+  flex-direction: column;
   /* The mood row used to sit here and space the note off the date. It doesn't
      any more, so the gap has to be stated. */
   margin-top: 16px;
   transition: opacity 0.08s ease;
+}
+
+/* The day's line. Set in the reading face, not the UI face — it's something to
+   read, like the entry above it — but a step down in size and weight of voice,
+   because this is the app speaking rather than the day's own text.
+   Muted rather than --day-ink deliberately: the mood already speaks through
+   *which* line this is, and a whole sentence in the day's colour would double
+   the saturated area the ramp is meant to own by itself. Same call that keeps
+   the dock muted — this is chrome standing next to the day, not written on it.
+   One line changes that if it ever should be: colour it --day-ink under
+   .app[data-mood], exactly as .tag does. */
+.day-quote {
+  margin: 20px 0 0;
+  font-family: var(--editor-font);
+  /* Derived from the note's measure, not a new size. */
+  font-size: calc(var(--editor-size) * 0.85);
+  line-height: 1.5;
+  font-style: italic;
+  /* --text-2, not --text-dim: dim is for metadata you glance at, and a whole
+     sentence set in it at this size disappears into the paper. */
+  color: var(--text-2);
+  /* A short measure keeps it an aside rather than a second entry. */
+  max-width: 32ch;
+  /* Opacity only, so it survives prefers-reduced-motion — fades stay. */
+  animation: quote-in 0.45s ease;
+}
+
+@keyframes quote-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
 /* ── Tap animation — single source of truth ──────────────────────────────

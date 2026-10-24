@@ -10,6 +10,12 @@ interface Props {
   /** How to mark each band edge — a buzz, a click, or nothing. A settings
    *  choice, not a capability check; see utils/feedback.ts. */
   feedback?: FeedbackPref
+  /** Fires on the finger going down and coming up again. `onChange` already
+   *  reports the value per band edge; this reports whether the gesture is
+   *  still in progress, for anything downstream that shouldn't redraw until
+   *  it ends — the day's quote holds still on it rather than flashing every
+   *  pool it crosses on the way past. */
+  onDraggingChange?: (dragging: boolean) => void
 }
 
 // How long the label lingers after you let go.
@@ -49,7 +55,7 @@ const CLEAR_DISTANCE = 56
  * made the right edge flicker on every page turn. The thumb carries the change
  * instead — it springs to the new day's band and cross-fades its colour.
  */
-export function MoodSlider({ value, onChange, feedback = 'vibrate' }: Props) {
+export function MoodSlider({ value, onChange, feedback = 'vibrate', onDraggingChange }: Props) {
   const railRef = useRef<HTMLDivElement>(null)
   const dragging = useRef(false)
   const lastIndex = useRef<number | null>(null)
@@ -119,6 +125,7 @@ export function MoodSlider({ value, onChange, feedback = 'vibrate' }: Props) {
 
   function onPointerDown(e: React.PointerEvent<HTMLDivElement>) {
     dragging.current = true
+    onDraggingChange?.(true)
     lastIndex.current = value
     armed.current = false
     setClearArmed(false)
@@ -135,6 +142,7 @@ export function MoodSlider({ value, onChange, feedback = 'vibrate' }: Props) {
   function onPointerUp(e: React.PointerEvent<HTMLDivElement>) {
     if (!dragging.current) return
     dragging.current = false
+    onDraggingChange?.(false)
     try { e.currentTarget.releasePointerCapture(e.pointerId) } catch { /* already released */ }
     if (armed.current) onChange(null)
     armed.current = false
